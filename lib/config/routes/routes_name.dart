@@ -1,0 +1,44 @@
+class RoutesName {
+  static const String firstLanguageScreen = '/first-language';
+  static const String enterMobileScreen = '/enter-mobile';
+  static const String otpVerificationScreen = '/otp';
+  static const String socialOtpVerificationScreen = '/social/otp';
+  static const String completeProfileScreen = '/complete-profile';
+  static const String loginScreen = '/login';
+  static const String registerScreen = '/register';
+  static const String socialUpdateMobileScreen = '/social/update-mobile';
+  static const String socialPhoneOtpScreen = '/social/phone-otp';
+  static const String forgotPasswordScreen = '/forgot-password';
+  static const String resetPasswordScreen = '/reset-password';
+  static const String chooseCarScreen = '/choose-car';
+  static const String addCarScreen = '/add-car';
+  static const String homeScreen = '/home';
+  static const String sparePartsScreen = '/spare-parts';
+  static const String contactCarsScreen = '/contact-cars';
+  static const String buyCarScreen = '/buy-car';
+  static const String mainScreen = '/main';
+  static const String invoiceDetailsScreen = '/invoice-details';
+  static const String jobOrdersScreen = '/job-orders';
+  static const String jobOrderDetailsScreen = '/job-order-details';
+  static const String notificationsScreen = '/notifications';
+  static const String informationBookingsScreen = '/information-bookings';
+  static const String bookingDetailsScreen = '/booking-details';
+  static const String jobEstimatorsScreen = '/job-estimators';
+  static const String jobEstimatorDetailsScreen = '/job-estimator-details';
+
+  static const String menuAccountScreen = '/menu/account';
+  static const String menuDocumentsScreen = '/menu/documents';
+  static const String menuShowroomScreen = '/menu/showroom';
+  static const String menuAboutSkodaScreen = '/menu/about-skoda';
+  static const String menuLoyaltyPointsScreen = '/menu/loyalty-points';
+  static const String menuRescueScreen = '/menu/rescue';
+  static const String menuContactScreen = '/menu/contact';
+  static const String menuAboutCenterScreen = '/menu/about-center';
+  static const String menuSupportMessagesScreen = '/menu/support-messages';
+  static const String menuChangeLanguageScreen = '/menu/change-language';
+  static const String menuUserGuideScreen = '/menu/user-guide';
+  static const String menuLogoutScreen = '/menu/logout';
+  static const String guestSplashScreen = '/guest-splash';
+  static const String fullscreenSplashScreen = '/fullscreen-splash';
+  static const String businessLocationsScreen = '/business-locations';
+}

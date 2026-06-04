@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "940276311352",
+    "project_id": "legendprotek-52968",
+    "storage_bucket": "legendprotek-52968.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:940276311352:android:8be2f233ab21e5e85a0dcd",
+        "android_client_info": {
+          "package_name": "com.legendprotek.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "940276311352-90fagka30tsci562plgfdfa9v8930eh0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.legendprotek.com",
+            "certificate_hash": "a8e17f1e77ce3311f71d229c4b1a1d42f995893c"
+          }
+        },
+        {
+          "client_id": "940276311352-nc7m3okpo9jgspf215g4eb65q87p4ka0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.legendprotek.com",
+            "certificate_hash": "d8721ea8439acc02b66580008032c106fc9d6e90"
+          }
+        },
+        {
+          "client_id": "940276311352-l6gm26ut08ceai8v40q410bbbheir218.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcbKKisEBTY6bZqj9ePj6dFK4YLHQeNDQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "940276311352-l6gm26ut08ceai8v40q410bbbheir218.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
