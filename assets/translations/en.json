@@ -137,6 +137,7 @@
     "all_services": "ALL SERVICES",
     "select_car": "Select car",
     "no_cars": "No cars found",
+    "add_car": "Add vehicle",
     "quick_book_now": "Book now",
     "quick_rescue": "Rescue service",
     "spare_parts": "Spare parts",
@@ -339,6 +340,7 @@
     "enter_mobile_subtitle": "We will send you a verification code to confirm your number.",
     "mobile_hint": "Mobile number",
     "send_otp": "Send verification code",
+    "oauth_login": "Login",
     "login_username_hint": "Username",
     "login_password_hint": "Password",
     "login_button": "Login",
@@ -375,7 +377,14 @@
   "account": {
     "title": "Account information",
     "logout": "Logout",
-    "delete_account": "Delete account"
+    "delete_account": "Delete account",
+    "save": "Save",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "email": "Email",
+    "mobile": "Mobile",
+    "car": "Vehicle",
+    "password": "Password"
   },
   "job_order": {
     "details": {

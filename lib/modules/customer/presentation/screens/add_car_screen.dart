@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
-import 'package:reservation_workshop/core/components/app_textfield.dart';
 import 'package:reservation_workshop/core/components/dialogs/prograss_delay_dialog.dart';
 import 'package:reservation_workshop/core/components/toasters.dart';
 import 'package:reservation_workshop/modules/customer/data/datasources/car_remote_datasource.dart';
@@ -23,7 +22,6 @@ class _AddCarScreenState extends State<AddCarScreen> {
   final TextEditingController _colorController = TextEditingController();
   final TextEditingController _chassisController = TextEditingController();
   final TextEditingController _plateController = TextEditingController();
-  final TextEditingController _yearController = TextEditingController();
 
   List<BrandModel> _brands = const <BrandModel>[];
   List<CarModelModel> _models = const <CarModelModel>[];
@@ -31,8 +29,8 @@ class _AddCarScreenState extends State<AddCarScreen> {
   BrandModel? _selectedBrand;
   CarModelModel? _selectedModel;
 
-  final List<String> _carTypes = const <String>['ملاكي', 'اجره', 'نقل', 'نقل ثقيل'];
-  String? _selectedCarType;
+  final List<String> _years = List.generate(30, (index) => (2025 - index).toString());
+  String? _selectedYear;
 
   bool _loadingBrands = false;
   bool _loadingModels = false;
@@ -48,7 +46,6 @@ class _AddCarScreenState extends State<AddCarScreen> {
     _colorController.dispose();
     _chassisController.dispose();
     _plateController.dispose();
-    _yearController.dispose();
     super.dispose();
   }
 
@@ -100,7 +97,7 @@ class _AddCarScreenState extends State<AddCarScreen> {
   Future<void> _submit() async {
     final brand = _selectedBrand;
     final model = _selectedModel;
-    final carType = _selectedCarType;
+    final year = _selectedYear;
 
     if (brand == null) {
       Toasters.show('اختر الماركة');
@@ -110,8 +107,8 @@ class _AddCarScreenState extends State<AddCarScreen> {
       Toasters.show('اختر الموديل');
       return;
     }
-    if (carType == null || carType.trim().isEmpty) {
-      Toasters.show('اختر نوع العربية');
+    if (year == null || year.trim().isEmpty) {
+      Toasters.show('اختر سنة الصنع');
       return;
     }
 
@@ -127,8 +124,8 @@ class _AddCarScreenState extends State<AddCarScreen> {
         color: _colorController.text.trim(),
         chassisNumber: _chassisController.text.trim(),
         plateNumber: _plateController.text.trim(),
-        manufacturingYear: _yearController.text.trim(),
-        carType: carType.trim(),
+        manufacturingYear: year.trim(),
+        carType: 'ملاكي',
       );
 
       if (!mounted) return;
@@ -151,20 +148,20 @@ class _AddCarScreenState extends State<AddCarScreen> {
   InputDecoration _dropdownDecoration({required String hint}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.black),
+      hintStyle: const TextStyle(color: Colors.white54),
       filled: true,
-      fillColor: const Color(0xFF0A0A0A),
+      fillColor: const Color(0xFF1A1A1A),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: const Color(0xFF0A0A0A)),
+        borderSide: const BorderSide(color: Color(0xFF2A2A2A)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: const Color(0xFF0A0A0A)),
+        borderSide: const BorderSide(color: Color(0xFF2A2A2A)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: const Color(0xFFD4AF37)),
+        borderSide: const BorderSide(color: Color(0xFFD4AF37)),
       ),
     );
   }
@@ -203,24 +200,45 @@ class _AddCarScreenState extends State<AddCarScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // Year Input
+                  // Chassis Input
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF050505),
-                      border: Border.all(color: const Color(0xFF0A0A0A), width: 2),
+                      color: const Color(0xFF1A1A1A),
+                      border: Border.all(color: const Color(0xFF2A2A2A), width: 1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: TextFormField(
-                      controller: _yearController,
+                      controller: _chassisController,
                       validator: _requiredValidator,
                       textDirection: ui.TextDirection.ltr,
-                      keyboardType: TextInputType.number,
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
-                        hintText: 'سنة الصنع',
-                        hintStyle: const TextStyle(color: Colors.white70),
+                        hintText: 'رقم الشاسيه',
+                        hintStyle: const TextStyle(color: Colors.white54),
                         filled: true,
-                        fillColor: Colors.white70,
+                        fillColor: Colors.transparent,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Plate Input
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1A1A),
+                      border: Border.all(color: const Color(0xFF2A2A2A), width: 1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TextFormField(
+                      controller: _plateController,
+                      validator: _requiredValidator,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                      decoration: InputDecoration(
+                        hintText: 'رقم اللوحة',
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        filled: true,
+                        fillColor: Colors.transparent,
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
@@ -232,11 +250,12 @@ class _AddCarScreenState extends State<AddCarScreen> {
                     decoration: _dropdownDecoration(hint: 'الماركة'),
                     value: _selectedBrand,
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                    dropdownColor: const Color(0xFF1A1A1A),
                     items: _brands
                         .map(
                           (b) => DropdownMenuItem<BrandModel>(
                             value: b,
-                            child: Text(b.name, style: const TextStyle(color: Colors.black)),
+                            child: Text(b.name, style: const TextStyle(color: Colors.white)),
                           ),
                         )
                         .toList(),
@@ -261,12 +280,13 @@ class _AddCarScreenState extends State<AddCarScreen> {
                   DropdownButtonFormField<CarModelModel>(
                     decoration: _dropdownDecoration(hint: 'الموديل'),
                     value: _selectedModel,
-                    style: const TextStyle(color: Color.fromARGB(255, 15, 15, 15), fontWeight: FontWeight.w500),
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                    dropdownColor: const Color(0xFF1A1A1A),
                     items: _models
                         .map(
                           (m) => DropdownMenuItem<CarModelModel>(
                             value: m,
-                            child: Text(m.name, style: const TextStyle(color: Color.fromARGB(255, 245, 243, 243))),
+                            child: Text(m.name, style: const TextStyle(color: Colors.white)),
                           ),
                         )
                         .toList(),
@@ -278,27 +298,11 @@ class _AddCarScreenState extends State<AddCarScreen> {
                       child: LinearProgressIndicator(minHeight: 2),
                     ),
                   const SizedBox(height: 12),
-                  // Car Type Dropdown
-                  DropdownButtonFormField<String>(
-                    decoration: _dropdownDecoration(hint: 'نوع السيارة'),
-                    value: _selectedCarType,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-                    items: _carTypes
-                        .map(
-                          (t) => DropdownMenuItem<String>(
-                            value: t,
-                            child: Text(t, style: const TextStyle(color: Colors.white)),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) => setState(() => _selectedCarType = v),
-                  ),
-                  const SizedBox(height: 12),
                   // Color Input
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF050505),
-                      border: Border.all(color: const Color(0xFF0A0A0A), width: 2),
+                      color: const Color(0xFF1A1A1A),
+                      border: Border.all(color: const Color(0xFF2A2A2A), width: 1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: TextFormField(
@@ -307,58 +311,30 @@ class _AddCarScreenState extends State<AddCarScreen> {
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         hintText: 'اللون',
-                        hintStyle: const TextStyle(color: Colors.white70),
+                        hintStyle: const TextStyle(color: Colors.white54),
                         filled: true,
-                        fillColor: Colors.white70,
+                        fillColor: Colors.transparent,
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Chassis Input
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF050505),
-                      border: Border.all(color: const Color(0xFF0A0A0A), width: 2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: TextFormField(
-                      controller: _chassisController,
-                      validator: _requiredValidator,
-                      textDirection: ui.TextDirection.ltr,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-                      decoration: InputDecoration(
-                        hintText: 'رقم الشاسيه',
-                        hintStyle: const TextStyle(color: Colors.white70),
-                        filled: true,
-                        fillColor: Colors.white70,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Plate Input
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF050505),
-                      border: Border.all(color: const Color(0xFF0A0A0A), width: 2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: TextFormField(
-                      controller: _plateController,
-                      validator: _requiredValidator,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-                      decoration: InputDecoration(
-                        hintText: 'رقم اللوحة',
-                        hintStyle: const TextStyle(color: Colors.white70),
-                        filled: true,
-                        fillColor: const Color(0xFF050505),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      ),
-                    ),
+                  // Year Dropdown
+                  DropdownButtonFormField<String>(
+                    decoration: _dropdownDecoration(hint: 'سنة الصنع'),
+                    value: _selectedYear,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                    dropdownColor: const Color(0xFF1A1A1A),
+                    items: _years
+                        .map(
+                          (y) => DropdownMenuItem<String>(
+                            value: y,
+                            child: Text(y, style: const TextStyle(color: Colors.white)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedYear = v),
                   ),
                   const SizedBox(height: 24),
                   // Submit Button

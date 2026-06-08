@@ -38,7 +38,7 @@ class CustomerInfoCubit extends Cubit<CustomerInfoState> {
 
   Future<void> load() async {
     if (isClosed) return;
-    _safeEmit(CustomerInfoLoading());
+    _safeEmit(CustomerInfoInitial());
     try {
       if (await _isGuestMode()) {
         final guestInfo = CustomerInfo(

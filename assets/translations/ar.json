@@ -137,6 +137,7 @@
     "all_services": "جميع الخدمات",
     "select_car": "اختر السيارة",
     "no_cars": "لا توجد سيارات",
+    "add_car": "إضافة مركبة",
     "quick_book_now": "احجز الآن",
     "quick_rescue": "خدمة إنقاذ",
     "spare_parts": "قطع الغيار",
@@ -224,6 +225,7 @@
     "enter_mobile_subtitle": "سنرسل لك رمز تحقق لتأكيد رقمك.",
     "mobile_hint": "رقم الموبايل",
     "send_otp": "إرسال رمز التحقق",
+    "oauth_login": "تسجيل الدخول",
     "login_username_hint": "اسم المستخدم",
     "login_password_hint": "كلمة المرور",
     "login_button": "تسجيل الدخول",
@@ -260,11 +262,18 @@
   "account": {
     "title": "بيانات الحساب",
     "logout": "تسجيل خروج",
-    "delete_account": "حذف الحساب"
+    "delete_account": "حذف الحساب",
+    "save": "حفظ",
+    "first_name": "الاسم الأول",
+    "last_name": "الاسم الأخير",
+    "email": "البريد الإلكتروني",
+    "mobile": "رقم الهاتف",
+    "car": "المركبة",
+    "password": "كلمة المرور"
   },
   "cars": {
     "title": "سياراتي",
-    "choose_title": "اختر سيارتك",
+    "choose_title": "اختر المركبة",
     "empty": "لا توجد سيارات مرتبطة بالحساب",
     "add_car": "إضافة سيارة",
     "brand": "الماركة:",

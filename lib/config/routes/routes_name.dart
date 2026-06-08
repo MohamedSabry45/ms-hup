@@ -2,7 +2,7 @@ class RoutesName {
   static const String firstLanguageScreen = '/first-language';
   static const String enterMobileScreen = '/enter-mobile';
   static const String otpVerificationScreen = '/otp';
-  static const String socialOtpVerificationScreen = '/social/otp';
+  // static const String socialOtpVerificationScreen = '/social/otp'; // No longer needed - OTP flow removed
   static const String completeProfileScreen = '/complete-profile';
   static const String loginScreen = '/login';
   static const String registerScreen = '/register';

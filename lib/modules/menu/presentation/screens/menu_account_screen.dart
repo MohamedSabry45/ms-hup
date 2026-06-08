@@ -85,16 +85,24 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
     final valid = _basicInfoFormKey.currentState?.validate() ?? false;
     if (!valid) return;
 
-    await context.read<CustomerInfoCubit>().updateBasicInfo(
-          id: contactId,
-          firstName: _firstNameController.text.trim(),
-          lastName: _lastNameController.text.trim(),
-          email: _emailController.text.trim(),
-          mobile: _mobileController.text.trim(),
-        );
+    showPrograssDelayDialog(context);
+    try {
+      await context.read<CustomerInfoCubit>().updateBasicInfo(
+            id: contactId,
+            firstName: _firstNameController.text.trim(),
+            lastName: _lastNameController.text.trim(),
+            email: _emailController.text.trim(),
+            mobile: _mobileController.text.trim(),
+          );
 
-    if (!context.mounted) return;
-    Toasters.show('Updated successfully');
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).maybePop();
+      Toasters.show('Updated successfully');
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).maybePop();
+      Toasters.show(e.toString());
+    }
   }
 
   Future<void> _confirmDeleteAccount(BuildContext context) async {
@@ -203,18 +211,6 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
 
     return MultiBlocListener(
       listeners: [
-        BlocListener<CustomerInfoCubit, CustomerInfoState>(
-          listener: (context, state) {
-            if (state is CustomerInfoLoading) {
-              showPrograssDelayDialog(context);
-            } else {
-              Navigator.of(context, rootNavigator: true).maybePop();
-              if (state is CustomerInfoError) {
-                Toasters.show(state.message);
-              }
-            }
-          },
-        ),
         BlocListener<DeleteAccountCubit, DeleteAccountState>(
           listener: (context, state) {
             if (state is DeleteAccountLoading) {
@@ -371,7 +367,7 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
                                           style: const TextStyle(color: Colors.white),
                                           cursorColor: Colors.white,
                                           decoration: _fieldDecoration(
-                                            label: 'First name',
+                                            label: 'account.first_name'.tr(),
                                             icon: Icons.person_outline,
                                           ),
                                           validator: (_) => null,
@@ -385,7 +381,7 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
                                           style: const TextStyle(color: Colors.white),
                                           cursorColor: Colors.white,
                                           decoration: _fieldDecoration(
-                                            label: 'Last name',
+                                            label: 'account.last_name'.tr(),
                                             icon: Icons.person_outline,
                                           ),
                                           validator: (_) => null,
@@ -400,7 +396,7 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
                                     style: const TextStyle(color: Colors.white),
                                     cursorColor: Colors.white,
                                     decoration: _fieldDecoration(
-                                      label: 'Email',
+                                      label: 'account.email'.tr(),
                                       icon: Icons.email_outlined,
                                     ),
                                     keyboardType: TextInputType.emailAddress,
@@ -418,7 +414,7 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
                                     style: const TextStyle(color: Colors.white),
                                     cursorColor: Colors.white,
                                     decoration: _fieldDecoration(
-                                      label: 'Mobile',
+                                      label: 'account.mobile'.tr(),
                                       icon: Icons.phone_android,
                                     ),
                                     keyboardType: TextInputType.phone,
@@ -432,7 +428,7 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
                                     style: const TextStyle(color: Colors.white),
                                     cursorColor: Colors.white,
                                     decoration: _fieldDecoration(
-                                      label: 'Car',
+                                      label: 'account.car'.tr(),
                                       icon: Icons.directions_car,
                                     ),
                                   ),
@@ -445,7 +441,7 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
                                     style: const TextStyle(color: Colors.white),
                                     cursorColor: Colors.white,
                                     decoration: _fieldDecoration(
-                                      label: 'Password',
+                                      label: 'account.password'.tr(),
                                       icon: Icons.lock_outline,
                                     ),
                                   ),
@@ -458,7 +454,7 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
                                       if (!context.mounted) return;
                                       Navigator.pushNamedAndRemoveUntil(
                                         context,
-                                        RoutesName.enterMobileScreen,
+                                        RoutesName.loginScreen,
                                         (route) => false,
                                       );
                                     },
@@ -470,7 +466,7 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
                                         style: const TextStyle(color: Colors.white),
                                         cursorColor: Colors.white,
                                         decoration: _fieldDecoration(
-                                          label: 'Logout',
+                                          label: 'account.logout'.tr(),
                                           icon: Icons.logout,
                                         ),
                                       ),
@@ -506,9 +502,9 @@ class _MenuAccountScreenState extends State<MenuAccountScreen> {
                                       onPressed: state is CustomerInfoSuccess
                                           ? () => _saveBasicInfo(context, contactId: state.info.id)
                                           : null,
-                                      child: const Text(
-                                        'حفظ',
-                                        style: TextStyle(fontWeight: FontWeight.w900),
+                                      child: Text(
+                                        'account.save'.tr(),
+                                        style: const TextStyle(fontWeight: FontWeight.w900),
                                       ),
                                     ),
                                   ),

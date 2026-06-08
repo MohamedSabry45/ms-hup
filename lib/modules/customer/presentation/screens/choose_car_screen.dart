@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 
 import 'package:reservation_workshop/config/routes/routes_name.dart';
 import 'package:reservation_workshop/core/components/toasters.dart';
-import 'package:reservation_workshop/core/components/dialogs/prograss_delay_dialog.dart';
 import 'package:reservation_workshop/core/network/local/cache_helper.dart';
 import 'package:reservation_workshop/core/functions/localization_helper.dart';
 import 'package:reservation_workshop/core/utils/strings/prefkeys.dart';
@@ -59,13 +58,8 @@ class _ChooseCarScreenState extends State<ChooseCarScreen> {
   Widget build(BuildContext context) {
     return BlocListener<CustomerInfoCubit, CustomerInfoState>(
       listener: (context, state) {
-        if (state is CustomerInfoLoading) {
-          showPrograssDelayDialog(context);
-        } else {
-          Navigator.of(context, rootNavigator: true).maybePop();
-          if (state is CustomerInfoError) {
-            Toasters.show(state.message);
-          }
+        if (state is CustomerInfoError) {
+          Toasters.show(state.message);
         }
       },
       child: Scaffold(
@@ -74,7 +68,7 @@ class _ChooseCarScreenState extends State<ChooseCarScreen> {
           backgroundColor: Colors.black,
           elevation: 0,
           title: Text(
-            t(context, 'cars.choose_title', ar: 'اختر سيارتك', en: 'Choose your car'),
+            t(context, 'cars.choose_title', ar: 'اختر المركبه', en: 'Choose your car'),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w900,
@@ -88,7 +82,7 @@ class _ChooseCarScreenState extends State<ChooseCarScreen> {
           child: BlocBuilder<CustomerInfoCubit, CustomerInfoState>(
             builder: (context, state) {
               if (state is! CustomerInfoSuccess) {
-                return const Center(child: CircularProgressIndicator());
+                return const SizedBox.shrink();
               }
 
               final cars = state.info.cars;

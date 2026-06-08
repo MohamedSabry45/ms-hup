@@ -237,22 +237,41 @@ class AuthRemoteDataSource {
     return SocialAuthResponseModel.fromJson(decoded);
   }
 
-  Future<Map<String, dynamic>> sendPhoneVerificationOtp({
+  Future<SocialAuthResponseModel> sendPhoneVerificationOtp({
     required String phone,
     required String email,
+    String? name,
+    String? medium,
+    String? uniqueId,
+    int? userId,
   }) async {
     final baseUrl = AppConstants.kBaseUrl.trim();
     final uri = Uri.parse('$baseUrl${ApiEndpoints.sendPhoneVerificationOtp}');
+
+    final payload = <String, dynamic>{
+      'phone': phone.trim(),
+      'email': email.trim(),
+    };
+
+    if (name != null && name.trim().isNotEmpty) {
+      payload['name'] = name.trim();
+    }
+    if (medium != null && medium.trim().isNotEmpty) {
+      payload['medium'] = medium.trim();
+    }
+    if (uniqueId != null && uniqueId.trim().isNotEmpty) {
+      payload['unique_id'] = uniqueId.trim();
+    }
+    if (userId != null) {
+      payload['user_id'] = userId;
+    }
 
     final res = await _client.post(
       uri,
       headers: const <String, String>{
         'Content-Type': 'application/json',
       },
-      body: jsonEncode(<String, dynamic>{
-        'phone': phone.trim(),
-        'email': email.trim(),
-      }),
+      body: jsonEncode(payload),
     );
 
     final decoded = _decodeJson(res.body);
@@ -282,12 +301,7 @@ class AuthRemoteDataSource {
       throw Exception(_extractMessage(decoded) ?? 'Request failed');
     }
 
-    final success = decoded['success'] == true || decoded['success']?.toString() == 'true';
-    if (!success) {
-      throw Exception(_extractMessage(decoded) ?? 'Request failed');
-    }
-
-    return decoded;
+    return SocialAuthResponseModel.fromJson(decoded);
   }
 
   Future<SocialAuthResponseModel> verifyPhoneAndSetMobile({

@@ -271,27 +271,42 @@ class SocialAuthCubit extends Cubit<SocialAuthState> {
     }
 
     try {
-      await _remote.updateSocialMobile(
+      final res = await _remote.sendPhoneVerificationOtp(
+        phone: p,
         email: em,
         name: n,
-        phone: p,
         medium: med,
         uniqueId: uid,
         userId: userId,
       );
 
-      final decoded = await _remote.sendPhoneVerificationOtp(phone: p, email: em);
       if (isClosed) return;
 
-      final expires = int.tryParse(decoded['expires_in_minutes']?.toString() ?? '') ?? 0;
-      final pendingPhone = decoded['pending_phone']?.toString() ?? p;
-      _safeEmit(
-        SocialAuthSendPhoneOtpSuccess(
-          phone: pendingPhone.trim().isNotEmpty ? pendingPhone : p,
-          email: em,
-          expiresInMinutes: expires,
-        ),
-      );
+      if (res.isSoftDeleted && (res.userId ?? 0) > 0) {
+        _safeEmit(
+          SocialAuthRestoreRequired(
+            userId: res.userId!,
+            message: res.message.isNotEmpty ? res.message : 'Account has been deleted. Please restore it to continue.',
+          ),
+        );
+        return;
+      }
+
+      if (res.success != true) {
+        _safeEmit(SocialAuthError(res.message.isNotEmpty ? res.message : 'Request failed'));
+        return;
+      }
+
+      if (res.token.trim().isNotEmpty) {
+        AppConstants.token = res.token;
+        await CacheHelper.saveData(key: PrefKeys.kAccessToken, value: res.token);
+        if (isClosed) return;
+        _safeEmit(SocialAuthSuccess(res.token));
+        return;
+      }
+
+      if (isClosed) return;
+      _safeEmit(SocialAuthError(res.message.isNotEmpty ? res.message : 'Request failed'));
     } on SocialAuthOwnershipRequiredException catch (e) {
       _safeEmit(
         SocialAuthOwnershipRequired(

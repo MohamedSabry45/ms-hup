@@ -90,7 +90,7 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
               ),
               // Greeting and Car Info - Left/Right based on language
               Positioned(
-                top: isMobile ? 130 : 150,
+                top: isMobile ? 160 : 180,
                 left: isMobile ? 16 : 32,
                 right: isMobile ? 16 : 32,
                 child: Directionality(

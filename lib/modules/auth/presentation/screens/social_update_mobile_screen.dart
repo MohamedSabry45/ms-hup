@@ -210,26 +210,6 @@ class _SocialUpdateMobileScreenState extends State<SocialUpdateMobileScreen> {
           return;
         }
 
-        if (state is SocialAuthSendPhoneOtpSuccess) {
-          if (_dialogShown) {
-            Navigator.of(context, rootNavigator: true).maybePop();
-            _dialogShown = false;
-          }
-          Navigator.pushNamed(
-            context,
-            RoutesName.socialOtpVerificationScreen,
-            arguments: <String, dynamic>{
-              'mobile': state.phone,
-              'email': email,
-              'name': name,
-              'medium': medium,
-              'unique_id': uniqueId,
-              'user_id': userId,
-            },
-          );
-          return;
-        }
-
         if (state is SocialAuthSuccess) {
           if (_dialogShown) {
             Navigator.of(context, rootNavigator: true).maybePop();
@@ -411,7 +391,7 @@ class _SocialUpdateMobileScreenState extends State<SocialUpdateMobileScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Send OTP Button
+                        // Login Button
                         SizedBox(
                           width: double.infinity,
                           height: 52,
@@ -437,7 +417,7 @@ class _SocialUpdateMobileScreenState extends State<SocialUpdateMobileScreen> {
                               ),
                             ),
                             child: Text(
-                              'auth.send_otp'.tr(),
+                              'auth.oauth_login'.tr(),
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,

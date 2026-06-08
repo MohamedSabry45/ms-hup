@@ -24,7 +24,7 @@ import 'package:reservation_workshop/modules/auth/presentation/screens/enter_mob
 import 'package:reservation_workshop/modules/auth/presentation/screens/login_screen.dart';
 import 'package:reservation_workshop/modules/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:reservation_workshop/modules/auth/presentation/screens/register_screen.dart';
-import 'package:reservation_workshop/modules/auth/presentation/screens/social_otp_verification_screen.dart';
+// import 'package:reservation_workshop/modules/auth/presentation/screens/social_otp_verification_screen.dart'; // No longer needed - OTP flow removed
 import 'package:reservation_workshop/modules/auth/presentation/screens/social_update_mobile_screen.dart';
 import 'package:reservation_workshop/modules/auth/presentation/screens/social_phone_otp_screen.dart';
 import 'package:reservation_workshop/modules/auth/presentation/screens/forgot_password_screen.dart';
@@ -210,6 +210,8 @@ class MyApp extends StatelessWidget {
         BlocProvider<ShiftCubit>(create: (_) => ShiftCubit()),
         BlocProvider<BlogCubit>(create: (_) => BlogCubit()),
         BlocProvider<BusinessLocationsCubit>(create: (_) => BusinessLocationsCubit()),
+        BlocProvider<CustomerInfoCubit>(create: (_) => CustomerInfoCubit()),
+        BlocProvider<DeleteAccountCubit>(create: (_) => DeleteAccountCubit()),
       ],
       child: MaterialApp(
         scaffoldMessengerKey: Toasters.messengerKey,
@@ -248,7 +250,7 @@ class MyApp extends StatelessWidget {
                 child: const ResetPasswordScreen(),
               ),
           RoutesName.otpVerificationScreen: (_) => const OtpVerificationScreen(),
-          RoutesName.socialOtpVerificationScreen: (_) => const SocialOtpVerificationScreen(),
+          // RoutesName.socialOtpVerificationScreen: (_) => const SocialOtpVerificationScreen(), // No longer needed - OTP flow removed
           RoutesName.completeProfileScreen: (_) => const CompleteProfileScreen(),
           RoutesName.loginScreen: (_) => BlocProvider<LoginCubit>(
                 create: (_) => LoginCubit(),
@@ -344,12 +346,12 @@ class MyApp extends StatelessWidget {
               ),
           RoutesName.jobEstimatorDetailsScreen: (_) => const JobEstimatorDetailsScreen(),
 
-          RoutesName.menuAccountScreen: (_) => MultiBlocProvider(
-                providers: [
-                  BlocProvider<CustomerInfoCubit>(create: (_) => CustomerInfoCubit()),
-                  BlocProvider<DeleteAccountCubit>(create: (_) => DeleteAccountCubit()),
-                ],
-                child: const MenuAccountScreen(),
+          RoutesName.menuAccountScreen: (context) => BlocProvider.value(
+                value: BlocProvider.of<CustomerInfoCubit>(context),
+                child: BlocProvider.value(
+                  value: BlocProvider.of<DeleteAccountCubit>(context),
+                  child: const MenuAccountScreen(),
+                ),
               ),
           RoutesName.menuAboutSkodaScreen: (_) => const MenuAboutSkodaScreen(),
           RoutesName.menuRescueScreen: (_) => MenuRescueScreen(),

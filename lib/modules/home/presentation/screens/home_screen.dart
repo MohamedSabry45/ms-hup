@@ -169,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     // App Bar with menu only
                     Positioned(
-                      top: isMobile ? 16 : 24,
+                      top: isMobile ? 48 : 56,
                       left: 12,
                       right: 12,
                       child: Container(

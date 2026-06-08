@@ -14,19 +14,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "940276311352-90fagka30tsci562plgfdfa9v8930eh0.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.legendprotek.com",
-            "certificate_hash": "a8e17f1e77ce3311f71d229c4b1a1d42f995893c"
-          }
-        },
-        {
           "client_id": "940276311352-nc7m3okpo9jgspf215g4eb65q87p4ka0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.legendprotek.com",
             "certificate_hash": "d8721ea8439acc02b66580008032c106fc9d6e90"
+          }
+        },
+        {
+          "client_id": "940276311352-sl5n3f6g5f471l3fj7fakb8m6uj266nt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.legendprotek.com",
+            "certificate_hash": "8eb26350adf7ea5ab085d876f3aca0eca12fdd7c"
           }
         },
         {
@@ -45,6 +45,13 @@
             {
               "client_id": "940276311352-l6gm26ut08ceai8v40q410bbbheir218.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "940276311352-tkfcun36uvju02u1hisrn8sd1p9pnl8b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.legendprotek.com"
+              }
             }
           ]
         }
