@@ -71,6 +71,8 @@
     "greeting": "مرحبا",
     "greeting_named": "مرحبا، {}",
     "subtitle": "احجز موعدك بسهولة",
+    "barber_subtitle": "احجز موعد الحلاق",
+    "simulator_subtitle": "احجز جلسة المحاكاة",
     "car": "السيارة",
     "select_branch": "اختر الفرع",
     "select_service": "اختر الخدمة",
@@ -80,7 +82,10 @@
     "toast_select_branch": "اختر الفرع",
     "toast_select_service": "اختر الخدمة",
     "can_edit_before_confirm": "يمكنك تعديل التفاصيل قبل التأكيد",
-    "book_now": "احجز الآن"
+    "book_now": "احجز الآن",
+    "tab_booking": "حجز",
+    "tab_service": "حلاق",
+    "tab_estimator": "محاكاة"
   },
   "notifications": {
     "title": "الإشعارات",

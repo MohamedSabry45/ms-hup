@@ -25,8 +25,8 @@ class ProformaCustomerSection extends StatelessWidget {
     InputDecoration decorate({Widget? suffixIcon}) {
       return InputDecoration(
         filled: true,
-        fillColor: AppColors.white2,
-        hintStyle: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.brandDark),
+        fillColor: AppColors.brandDark,
+        hintStyle: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white70),
         border: baseBorder,
         enabledBorder: baseBorder,
         focusedBorder: baseBorder.copyWith(
@@ -40,7 +40,7 @@ class ProformaCustomerSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.brandDark,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.brandOutline.withOpacity(0.35)),
       ),
@@ -63,7 +63,7 @@ class ProformaCustomerSection extends StatelessWidget {
                 'Customer',
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w900,
-                  color: AppColors.brandDark,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -73,7 +73,7 @@ class ProformaCustomerSection extends StatelessWidget {
             'Transaction date',
             style: TextStyle(
               fontWeight: FontWeight.w900,
-              color: AppColors.brandDark,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 8),
@@ -83,10 +83,10 @@ class ProformaCustomerSection extends StatelessWidget {
             child: IgnorePointer(
               child: TextFormField(
                 controller: transactionDateController,
-                decoration: decorate(suffixIcon: const Icon(Icons.calendar_today_outlined)),
+                decoration: decorate(suffixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.white70)),
                 style: const TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: AppColors.brandDark,
+                  color: Colors.white,
                 ),
                 validator: (v) {
                   if ((v ?? '').trim().isEmpty) return 'Required';

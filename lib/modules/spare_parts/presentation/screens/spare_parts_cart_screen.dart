@@ -201,19 +201,19 @@ class _SparePartsCartScreenState extends State<SparePartsCartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.black,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.black,
         elevation: 0,
         centerTitle: true,
         title: const Text(
           'Cart',
           style: TextStyle(
             fontWeight: FontWeight.w900,
-            color: Colors.black87,
+            color: Colors.white,
           ),
         ),
-        iconTheme: const IconThemeData(color: Colors.black87),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: MultiBlocProvider(
         providers: [
@@ -235,9 +235,9 @@ class _SparePartsCartScreenState extends State<SparePartsCartScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.brandDark,
                               borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: Colors.grey.shade300),
+                              border: Border.all(color: AppColors.brandOutline),
                             ),
                             child: Row(
                               children: [
@@ -256,7 +256,7 @@ class _SparePartsCartScreenState extends State<SparePartsCartScreen> {
                                     'Your cart is empty',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w900,
-                                      color: Colors.black87,
+                                      color: Colors.white,
                                       height: 1.2,
                                     ),
                                   ),

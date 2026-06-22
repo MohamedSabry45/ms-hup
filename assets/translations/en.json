@@ -71,6 +71,8 @@
     "greeting": "Hello",
     "greeting_named": "Hello, {}",
     "subtitle": "Book your appointment easily",
+    "barber_subtitle": "Book your barber appointment",
+    "simulator_subtitle": "Book your simulator session",
     "car": "Car",
     "select_branch": "Select branch",
     "select_service": "Select service",
@@ -80,7 +82,10 @@
     "toast_select_branch": "Select branch",
     "toast_select_service": "Select service",
     "can_edit_before_confirm": "You can edit details before confirming",
-    "book_now": "Book Now"
+    "book_now": "Book Now",
+    "tab_booking": "Booking",
+    "tab_service": "Barber",
+    "tab_estimator": "Simulator"
   },
   "notifications": {
     "title": "Notifications",

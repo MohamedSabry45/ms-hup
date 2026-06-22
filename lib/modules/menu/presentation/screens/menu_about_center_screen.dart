@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:reservation_workshop/modules/locations/presentation/cubit/business_locations_cubit.dart';
-import 'package:reservation_workshop/modules/locations/presentation/screens/business_locations_screen.dart';
+import 'package:reservation_workshop/core/functions/localization_helper.dart';
+import 'package:reservation_workshop/modules/about_us/presentation/cubit/about_us_cubit.dart';
+import 'package:reservation_workshop/modules/about_us/presentation/screens/about_us_screen.dart';
 
 class MenuAboutCenterScreen extends StatelessWidget {
   const MenuAboutCenterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<BusinessLocationsCubit>(
-      create: (_) => BusinessLocationsCubit(),
-      child: const BusinessLocationsScreen(),
+    return BlocProvider<AboutUsCubit>(
+      create: (_) => AboutUsCubit()..load(),
+      child: AboutUsScreen(
+        title: t(context, 'about.center_title', ar: 'عن المركز', en: 'About the Center'),
+      ),
     );
   }
 }

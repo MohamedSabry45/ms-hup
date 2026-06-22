@@ -59,10 +59,10 @@ class _ShippingSectionState extends State<ShippingSection> {
     InputDecoration decorate({String? hint}) {
       return InputDecoration(
         filled: true,
-        fillColor: AppColors.white2,
+        fillColor: AppColors.brandDark,
         hintStyle: const TextStyle(
           fontWeight: FontWeight.w700,
-          color: AppColors.brandDark,
+          color: Colors.white70,
         ),
         hintText: hint,
         border: baseBorder,
@@ -77,7 +77,7 @@ class _ShippingSectionState extends State<ShippingSection> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.brandDark,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.brandOutline.withOpacity(0.35)),
       ),
@@ -100,7 +100,7 @@ class _ShippingSectionState extends State<ShippingSection> {
                 'Shipping',
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w900,
-                  color: AppColors.brandDark,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -108,7 +108,7 @@ class _ShippingSectionState extends State<ShippingSection> {
           const SizedBox(height: 14),
           const Text(
             'Shipping type',
-            style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandDark),
+            style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
@@ -128,13 +128,13 @@ class _ShippingSectionState extends State<ShippingSection> {
               widget.onShippingTypeChanged?.call(v ?? '');
               widget.onBranchChanged?.call(v == 'pickup' ? _selectedBranchId : null);
             },
-            style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.brandDark),
+            style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
           ),
           if (_selectedType == 'pickup') ...[
             const SizedBox(height: 12),
             const Text(
               'Branch',
-              style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandDark),
+              style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
             ),
             const SizedBox(height: 8),
             BlocBuilder<BranchCubit, BranchState>(
@@ -148,7 +148,7 @@ class _ShippingSectionState extends State<ShippingSection> {
                     decoration: decorate(hint: 'Failed to load branches'),
                     items: const [],
                     onChanged: null,
-                    style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.brandDark),
+                    style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
                   );
                 }
                 final branches = state is BranchSuccess ? state.branches : <Branch>[];
@@ -162,7 +162,7 @@ class _ShippingSectionState extends State<ShippingSection> {
                     setState(() => _selectedBranchId = v);
                     widget.onBranchChanged?.call(v);
                   },
-                  style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.brandDark),
+                  style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
                 );
               },
             ),
@@ -170,24 +170,24 @@ class _ShippingSectionState extends State<ShippingSection> {
           const SizedBox(height: 12),
           const Text(
             'Shipping details',
-            style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandDark),
+            style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
           ),
           const SizedBox(height: 8),
           TextFormField(
             controller: widget.shippingDetailsController,
             decoration: decorate(),
-            style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.brandDark),
+            style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
           ),
           const SizedBox(height: 12),
           const Text(
             'Shipping address',
-            style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandDark),
+            style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
           ),
           const SizedBox(height: 8),
           TextFormField(
             controller: widget.shippingAddressController,
             decoration: decorate(),
-            style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.brandDark),
+            style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
           ),
           const SizedBox(height: 12),
           Row(
@@ -195,14 +195,14 @@ class _ShippingSectionState extends State<ShippingSection> {
               Expanded(
                 child: Text(
                   'Shipping status',
-                  style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandDark),
+                  style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
                 ),
               ),
               SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Delivered to',
-                  style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandDark),
+                  style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
                 ),
               ),
             ],
@@ -214,7 +214,7 @@ class _ShippingSectionState extends State<ShippingSection> {
                 child: TextFormField(
                   controller: widget.shippingStatusController,
                   decoration: decorate(),
-                  style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.brandDark),
+                  style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
                 ),
               ),
               const SizedBox(width: 12),
@@ -222,7 +222,7 @@ class _ShippingSectionState extends State<ShippingSection> {
                 child: TextFormField(
                   controller: widget.deliveredToController,
                   decoration: decorate(),
-                  style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.brandDark),
+                  style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
                 ),
               ),
             ],

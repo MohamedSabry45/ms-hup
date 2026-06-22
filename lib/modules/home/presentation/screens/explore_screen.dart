@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:reservation_workshop/config/routes/routes_name.dart';
-
-const Color _msOrange = Color(0xFFF78905);
-const Color _msBlack = Color(0xFF000000);
-const Color _msCarbon = Color(0xFF141414);
+import 'package:reservation_workshop/config/style/app_colors.dart';
 
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({super.key});
@@ -72,9 +69,9 @@ class ExploreScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: _msBlack,
+      backgroundColor: AppColors.black,
       appBar: AppBar(
-        backgroundColor: _msBlack,
+        backgroundColor: AppColors.black,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8),
@@ -86,7 +83,7 @@ class ExploreScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-            onPressed: () => Navigator.pushNamed(context, RoutesName.sparePartsScreen),
+            onPressed: () => Navigator.pushNamed(context, RoutesName.sparePartsCartScreen),
           ),
           const SizedBox(width: 8),
         ],
@@ -200,13 +197,13 @@ class _ExploreCard extends StatelessWidget {
       child: Container(
         height: height,
         decoration: BoxDecoration(
-          color: _msCarbon,
+          color: AppColors.brandDark,
           borderRadius: BorderRadius.circular(20),
           image: DecorationImage(
             image: AssetImage(data.image),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              _msBlack.withOpacity(0.35),
+              AppColors.black.withOpacity(0.35),
               BlendMode.darken,
             ),
           ),
@@ -229,8 +226,8 @@ class _ExploreCard extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      _msBlack.withOpacity(0.75),
-                      _msBlack.withOpacity(0.95),
+                      AppColors.black.withOpacity(0.75),
+                      AppColors.black.withOpacity(0.95),
                     ],
                   ),
                 ),
@@ -254,7 +251,7 @@ class _ExploreCard extends StatelessWidget {
                           data.tag.tr().toUpperCase(),
                           style: TextStyle(
                             fontSize: 11,
-                            color: _msOrange,
+                            color: AppColors.brandPrimary,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.2,
                           ),
@@ -265,7 +262,7 @@ class _ExploreCard extends StatelessWidget {
                           children: [
                             Icon(
                               data.icon,
-                              color: _msOrange,
+                              color: AppColors.brandPrimary,
                               size: 22,
                             ),
                             const SizedBox(width: 8),

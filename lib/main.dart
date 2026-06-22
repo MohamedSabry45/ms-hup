@@ -58,6 +58,7 @@ import 'package:reservation_workshop/modules/job_estimators/presentation/screens
 import 'package:reservation_workshop/modules/home/presentation/screens/home_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/explore_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/spare_parts_screen.dart';
+import 'package:reservation_workshop/modules/spare_parts/presentation/screens/spare_parts_cart_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/contact_cars_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/buy_car_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/cubit/blog_cubit.dart';
@@ -282,6 +283,13 @@ class MyApp extends StatelessWidget {
                   BlocProvider<CartCubit>(create: (_) => CartCubit()),
                 ],
                 child: const SparePartsScreen(),
+              ),
+          RoutesName.sparePartsCartScreen: (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider<CartCubit>(create: (_) => CartCubit()),
+                  BlocProvider<CustomerInfoCubit>(create: (_) => CustomerInfoCubit()),
+                ],
+                child: const SparePartsCartScreen(),
               ),
           RoutesName.contactCarsScreen: (_) => const ContactCarsScreen(),
           RoutesName.buyCarScreen: (_) => BlocProvider<VehiclesCubit>(

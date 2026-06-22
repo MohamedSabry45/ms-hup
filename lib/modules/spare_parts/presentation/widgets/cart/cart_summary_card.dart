@@ -19,7 +19,7 @@ class CartSummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.brandDark,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.brandOutline.withOpacity(0.35)),
         boxShadow: [
@@ -36,14 +36,14 @@ class CartSummaryCard extends StatelessWidget {
           const SizedBox(height: 10),
           _Row(label: 'Subtotal', value: '${subtotal.toStringAsFixed(2)} EGP'),
           const SizedBox(height: 10),
-          const Divider(height: 1),
+          const Divider(height: 1, color: AppColors.brandOutline),
           const SizedBox(height: 10),
           _Row(
             label: 'Total',
             value: '${total.toStringAsFixed(2)} EGP',
             valueStyle: const TextStyle(
               fontWeight: FontWeight.w900,
-              color: AppColors.brandDark,
+              color: AppColors.brandPrimary,
               fontSize: 16,
             ),
           ),
@@ -72,7 +72,7 @@ class _Row extends StatelessWidget {
           label,
           style: const TextStyle(
             fontWeight: FontWeight.w900,
-            color: AppColors.brandDark,
+            color: Colors.white,
           ),
         ),
         const Spacer(),
@@ -81,7 +81,7 @@ class _Row extends StatelessWidget {
           style: valueStyle ??
               const TextStyle(
                 fontWeight: FontWeight.w900,
-                color: AppColors.brandDark,
+                color: Colors.white,
               ),
         ),
       ],

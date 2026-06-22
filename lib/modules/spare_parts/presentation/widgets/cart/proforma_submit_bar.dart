@@ -23,7 +23,7 @@ class ProformaSubmitBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.brandDark,
           border: Border(top: BorderSide(color: AppColors.brandOutline.withOpacity(0.35))),
           boxShadow: [
             BoxShadow(
@@ -42,7 +42,7 @@ class ProformaSubmitBar extends StatelessWidget {
                 children: [
                   const Text(
                     'Total',
-                    style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandDark),
+                    style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -50,7 +50,7 @@ class ProformaSubmitBar extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
-                      color: AppColors.brandDark,
+                      color: Colors.white,
                     ),
                   ),
                 ],

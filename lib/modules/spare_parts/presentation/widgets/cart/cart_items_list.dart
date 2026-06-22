@@ -39,7 +39,7 @@ class _CartItemTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.brandDark,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.brandOutline.withOpacity(0.35)),
         boxShadow: [
@@ -73,7 +73,7 @@ class _CartItemTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w900,
-                    color: AppColors.brandDark,
+                    color: Colors.white,
                     height: 1.15,
                   ),
                 ),
@@ -96,13 +96,13 @@ class _CartItemTile extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: AppColors.white2,
+                        color: AppColors.brandDark,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: AppColors.brandOutline.withOpacity(0.35)),
                       ),
                       child: Text(
                         '${item.quantity}',
-                        style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandDark),
+                        style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -116,7 +116,7 @@ class _CartItemTile extends StatelessWidget {
                       children: [
                         Text(
                           '${(item.unitPrice).toStringAsFixed(2)} EGP',
-                          style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandDark),
+                          style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -154,7 +154,7 @@ class _QtyButton extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.brandDark,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.brandPrimary, width: 1.6),
           boxShadow: [
