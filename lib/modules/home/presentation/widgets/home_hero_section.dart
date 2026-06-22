@@ -1,78 +1,130 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'dart:ui' as ui;
+import 'package:video_player/video_player.dart';
+
 import 'package:reservation_workshop/config/routes/routes_name.dart';
 import 'package:reservation_workshop/modules/customer/domain/entities/customer_car.dart';
 
+const Color _msOrange = Color(0xFFF78905);
+const Color _msBlack = Color(0xFF000000);
+const Color _msCharcoal = Color(0xFF0a0a0a);
+const Color _msCarbon = Color(0xFF141414);
+
 class HomeHeroSection extends StatefulWidget {
-  final ScrollController scrollController;
   final String greeting;
   final String carLabel;
   final List<CustomerCar> cars;
   final int? selectedCarId;
   final Function(int?) onCarSelected;
+  final VoidCallback? onMenuTap;
 
   const HomeHeroSection({
     super.key,
-    required this.scrollController,
     required this.greeting,
     required this.carLabel,
     required this.cars,
     required this.selectedCarId,
     required this.onCarSelected,
+    this.onMenuTap,
   });
 
   @override
   State<HomeHeroSection> createState() => _HomeHeroSectionState();
 }
 
-class _HomeHeroSectionState extends State<HomeHeroSection> {
+class _HomeHeroSectionState extends State<HomeHeroSection>
+    with TickerProviderStateMixin {
+  late final AnimationController _glowController;
+  late final AnimationController _shimmerController;
+  late final AnimationController _particleController;
+  late VideoPlayerController _videoController;
+  bool _videoReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
+
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat();
+
+    _particleController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat();
+
+    _videoController = VideoPlayerController.asset('assets/videos/hero-cinematic-video.mp4')
+      ..setLooping(true)
+      ..setVolume(0.0)
+      ..initialize().then((_) {
+        if (mounted) {
+          setState(() => _videoReady = true);
+          _videoController.play();
+        }
+      }).catchError((_) {
+        // Video failed to load; fallback gradient is already showing.
+      });
+  }
+
+  @override
+  void dispose() {
+    _glowController.dispose();
+    _shimmerController.dispose();
+    _particleController.dispose();
+    _videoController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isMobile = screenWidth < 600;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isMobile = screenWidth < 600;
 
-    return SizedBox(
-      height: MediaQuery.of(context).size.height,
-      child: AnimatedBuilder(
-        animation: widget.scrollController,
-        builder: (context, child) {
-          final scrollOffset = widget.scrollController.hasClients
-              ? widget.scrollController.offset
-              : 0.0;
-
-          // Calculate opacity and transform for each element
-          final logoOpacity = _calculateOpacity(scrollOffset, 0, 150);
-          final logoOffset = _calculateOffset(scrollOffset, 0, 150);
-          final logoScale = _calculateScale(scrollOffset, 0, 150);
-
-          final headlineOpacity = _calculateOpacity(scrollOffset, 50, 220);
-          final headlineOffset = _calculateOffset(scrollOffset, 50, 220);
-          final headlineScale = _calculateScale(scrollOffset, 50, 220);
-
-          final descriptionOpacity = _calculateOpacity(scrollOffset, 120, 300);
-          final descriptionOffset = _calculateOffset(scrollOffset, 120, 300);
-          final descriptionScale = _calculateScale(scrollOffset, 120, 300);
-
-          final buttonsOpacity = _calculateOpacity(scrollOffset, 180, 380);
-          final buttonsOffset = _calculateOffset(scrollOffset, 180, 380);
-          final buttonsScale = _calculateScale(scrollOffset, 180, 380);
-
-          final scrollIndicatorOpacity = _calculateOpacity(scrollOffset, 0, 100);
-
-          return Stack(
+        return SizedBox(
+          height: constraints.maxHeight,
+          child: AnimatedBuilder(
+            animation: Listenable.merge([
+              _glowController,
+              _shimmerController,
+              _particleController,
+            ]),
+            builder: (context, child) {
+              return Stack(
             children: [
-              // Background Image with Parallax
+              // Cinematic background layers
               Positioned.fill(
-                child: Transform.translate(
-                  offset: Offset(0, scrollOffset * 0.3),
-                  child: Image.asset(
-                    'assets/images/bgd.png',
-                    fit: BoxFit.cover,
-                  ),
+                child: _CinematicBackground(
+                  shimmerValue: _shimmerController.value,
+                  glowValue: _glowController.value,
                 ),
               ),
-              // Dark overlay
+
+              // Cinematic video background
+              Positioned.fill(
+                child: _videoReady
+                    ? FittedBox(
+                        fit: BoxFit.cover,
+                        child: SizedBox(
+                          width: _videoController.value.size.width,
+                          height: _videoController.value.size.height,
+                          child: VideoPlayer(_videoController),
+                        ),
+                      )
+                    : Image.asset(
+                        'assets/images/bgd.png',
+                        fit: BoxFit.cover,
+                      ),
+              ),
+
+              // Subtle bottom gradient so text stays readable
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -80,241 +132,137 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withOpacity(0.7),
-                        Colors.black.withOpacity(0.5),
-                        Colors.black.withOpacity(0.7),
+                        Colors.transparent,
+                        Colors.transparent,
+                        _msBlack.withOpacity(0.25),
+                        _msBlack.withOpacity(0.65),
                       ],
+                      stops: const [0.0, 0.5, 0.75, 1.0],
                     ),
                   ),
                 ),
               ),
-              // Greeting and Car Info - Left/Right based on language
+
+              // Dust / particle overlay
+              Positioned.fill(
+                child: _ParticleOverlay(
+                  particleValue: _particleController.value,
+                  isMobile: isMobile,
+                ),
+              ),
+
+              // Top bar: Logo + Menu + Weather widget
               Positioned(
-                top: isMobile ? 160 : 180,
-                left: isMobile ? 16 : 32,
-                right: isMobile ? 16 : 32,
-                child: Directionality(
-                  textDirection: context.locale.languageCode == 'ar' 
-                      ? ui.TextDirection.rtl 
-                      : ui.TextDirection.ltr,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildGreeting(widget.greeting, isMobile),
-                            const SizedBox(height: 8),
-                            _buildCustomDropdown(context, isMobile),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // Hero Content
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                top: isMobile ? 48 : 56,
+                left: 16,
+                right: 16,
+                child: Row(
                   children: [
-                    const SizedBox(height: 40),
-                    // Logo with golden glow
-                    Opacity(
-                      opacity: logoOpacity,
-                      child: Transform.translate(
-                        offset: Offset(0, -logoOffset),
-                        child: Transform.scale(
-                          scale: logoScale,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFFD4AF37).withOpacity(0.4),
-                                  blurRadius: 50,
-                                  spreadRadius: 0,
-                                ),
-                              ],
+                    Image.asset(
+                      'assets/images/logoappbar.png',
+                      height: isMobile ? 48 : 56,
+                    ),
+                    const Spacer(),
+                    if (widget.onMenuTap != null)
+                      GestureDetector(
+                        onTap: widget.onMenuTap,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          margin: const EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(
+                            color: _msCarbon.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.1),
                             ),
-                            child: Image.asset(
-                              'assets/images/logo.png',
-                              width: isMobile ? 180 : 240,
-                              height: isMobile ? 180 : 240,
-                            ),
+                          ),
+                          child: Icon(
+                            Icons.menu,
+                            color: _msOrange,
+                            size: isMobile ? 20 : 22,
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 32),
-                    // Headline
-                    Opacity(
-                      opacity: headlineOpacity,
-                      child: Transform.translate(
-                        offset: Offset(0, -headlineOffset),
-                        child: Transform.scale(
-                          scale: headlineScale,
-                          child: ShaderMask(
-                            shaderCallback: (bounds) => const LinearGradient(
-                              colors: [Color(0xFFFFFFFF), Color(0xFFD4AF37), Color(0xFFB8942E)],
-                              stops: [0.0, 0.5, 1.0],
-                            ).createShader(bounds),
-                            child: Text(
-                              'home.hero_headline'.tr(),
-                              style: TextStyle(
-                                fontSize: isMobile ? 28 : 42,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 2,
-                                height: 1.2,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Description
-                    Opacity(
-                      opacity: descriptionOpacity,
-                      child: Transform.translate(
-                        offset: Offset(0, -descriptionOffset),
-                        child: Transform.scale(
-                          scale: descriptionScale,
-                          child: SizedBox(
-                            width: isMobile ? 300 : 600,
-                            child: Text(
-                              'home.hero_description'.tr(),
-                              style: TextStyle(
-                                fontSize: isMobile ? 14 : 18,
-                                color: Colors.white.withOpacity(0.7),
-                                letterSpacing: 1,
-                                height: 1.5,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    // Buttons
-                    Opacity(
-                      opacity: buttonsOpacity,
-                      child: Transform.translate(
-                        offset: Offset(0, -buttonsOffset),
-                        child: Transform.scale(
-                          scale: buttonsScale,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Primary CTA Button
-                              GestureDetector(
-                                onTap: () => Navigator.pushNamed(context, RoutesName.mainScreen, arguments: 2),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFFD4AF37), Color(0xFFB8942E)],
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFFD4AF37).withOpacity(0.3),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: isMobile ? 32 : 48,
-                                      vertical: isMobile ? 14 : 18,
-                                    ),
-                                    child: Text(
-                                      'home.hero_primary_cta'.tr().toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: isMobile ? 14 : 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                        letterSpacing: 2,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              // Secondary CTA Button
-                              GestureDetector(
-                                onTap: () => Navigator.pushNamed(context, RoutesName.chooseCarScreen),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: const Color(0xFFD4AF37),
-                                      width: 1.5,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: isMobile ? 32 : 48,
-                                      vertical: isMobile ? 14 : 18,
-                                    ),
-                                    child: Text(
-                                      'home.hero_secondary_cta'.tr().toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: isMobile ? 14 : 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color(0xFFD4AF37),
-                                        letterSpacing: 2,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    _WeatherWidget(isMobile: isMobile),
                   ],
                 ),
               ),
-              // Scroll indicator at bottom
-              Positioned(
-                bottom: 64,
-                left: 0,
-                right: 0,
-                child: Opacity(
-                  opacity: scrollIndicatorOpacity,
+
+              // Hero Content (centered)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
-                    children: [
-                      Text(
-                        'home.hero_scroll_hint'.tr().toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.white.withOpacity(0.3),
-                          letterSpacing: 4,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        width: 1,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              const Color(0xFFD4AF37),
-                              Colors.transparent,
-                            ],
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Small label
+                          Text(
+                            'home.hero_label'.tr(),
+                            style: TextStyle(
+                              fontSize: isMobile ? 10 : 12,
+                              color: Colors.white.withOpacity(0.65),
+                              letterSpacing: 3,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
+                          const SizedBox(height: 16),
+
+                          // Headline
+                          Text(
+                            'home.hero_title'.tr(),
+                            style: TextStyle(
+                              fontSize: isMobile ? 36 : 52,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                              height: 1.05,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Subtitle
+                          SizedBox(
+                            width: isMobile ? 300 : 480,
+                            child: Text(
+                              'home.hero_subtitle'.tr(),
+                              style: TextStyle(
+                                fontSize: isMobile ? 14 : 16,
+                                color: Colors.white.withOpacity(0.65),
+                                height: 1.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+
+                          // Explore Button
+                          _ExploreButton(
+                            onTap: () => Navigator.pushNamed(
+                              context,
+                              RoutesName.exploreScreen,
+                            ),
+                            isMobile: isMobile,
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
+                  ),
+
+              // Bottom bar
+              Positioned(
+                bottom: 28,
+                left: 20,
+                right: 20,
+                child: Text(
+                  'home.scroll_to_discover'.tr(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.4),
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
@@ -323,235 +271,222 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
         },
       ),
     );
+      },
+    );
   }
 
-  double _calculateOpacity(double scrollOffset, double start, double end) {
-    if (scrollOffset <= start) return 1.0;
-    if (scrollOffset >= end) return 0.0;
-    return 1.0 - ((scrollOffset - start) / (end - start));
-  }
+}
 
-  double _calculateOffset(double scrollOffset, double start, double end) {
-    if (scrollOffset <= start) return 0.0;
-    if (scrollOffset >= end) return 50.0;
-    return ((scrollOffset - start) / (end - start)) * 50.0;
-  }
+class _ExploreButton extends StatelessWidget {
+  final VoidCallback onTap;
+  final bool isMobile;
 
-  double _calculateScale(double scrollOffset, double start, double end) {
-    if (scrollOffset <= start) return 1.0;
-    if (scrollOffset >= end) return 0.9;
-    return 1.0 - ((scrollOffset - start) / (end - start)) * 0.1;
-  }
+  const _ExploreButton({required this.onTap, required this.isMobile});
 
-  Widget _buildCarLabel(String carLabel, bool isMobile) {
-    // Parse car label to make plate number yellow
-    // Format: "device model plate"
-    final parts = carLabel.split(' ');
-    if (parts.length < 2) {
-      return Text(
-        carLabel,
-        style: TextStyle(
-          fontSize: isMobile ? 14 : 16,
-          color: Colors.white,
-          fontWeight: FontWeight.w500,
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: _msOrange,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: _msOrange.withOpacity(0.35),
+              blurRadius: 28,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      );
-    }
-    
-    // Assume last part is plate number
-    final plateNumber = parts.last;
-    final carName = parts.sublist(0, parts.length - 1).join(' ');
-    
-    return RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: carName,
-            style: TextStyle(
-              fontSize: isMobile ? 14 : 16,
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          TextSpan(
-            text: ' $plateNumber',
-            style: TextStyle(
-              fontSize: isMobile ? 14 : 16,
-              color: const Color(0xFFD4AF37),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildGreeting(String greeting, bool isMobile) {
-    // Parse greeting to make name yellow
-    // Format: "Hello, Name" or "مرحبا، الاسم"
-    if (context.locale.languageCode == 'ar') {
-      final parts = greeting.split('،');
-      if (parts.length > 1) {
-        return RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: parts[0] + '،',
-                style: TextStyle(
-                  fontSize: isMobile ? 18 : 22,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              TextSpan(
-                text: ' ' + parts.sublist(1).join('،'),
-                style: TextStyle(
-                  fontSize: isMobile ? 18 : 22,
-                  color: const Color(0xFFD4AF37),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        );
-      }
-    } else {
-      final parts = greeting.split(',');
-      if (parts.length > 1) {
-        return RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: parts[0] + ',',
-                style: TextStyle(
-                  fontSize: isMobile ? 18 : 22,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              TextSpan(
-                text: ' ' + parts.sublist(1).join(','),
-                style: TextStyle(
-                  fontSize: isMobile ? 18 : 22,
-                  color: const Color(0xFFD4AF37),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        );
-      }
-    }
-    
-    return Text(
-      greeting,
-      style: TextStyle(
-        fontSize: isMobile ? 18 : 22,
-        color: Colors.white,
-        fontWeight: FontWeight.w700,
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildCustomDropdown(BuildContext context, bool isMobile) {
-    return PopupMenuButton<int>(
-      initialValue: widget.selectedCarId,
-      position: PopupMenuPosition.under,
-      color: const Color(0xFF050505),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.directions_car_filled_outlined,
-            size: isMobile ? 18 : 20,
-            color: const Color(0xFFD4AF37),
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: _buildCarLabel(widget.carLabel, isMobile),
-          ),
-          const SizedBox(width: 4),
-          Icon(
-            Icons.keyboard_arrow_down,
-            size: isMobile ? 18 : 20,
-            color: const Color(0xFFD4AF37),
-          ),
-        ],
-      ),
-      itemBuilder: (context) {
-        if (widget.cars.isEmpty) {
-          return [
-            PopupMenuItem<int>(
-              value: null,
-              enabled: false,
-              height: 56,
-              child: Text(
-                'home.no_cars'.tr(),
-                style: TextStyle(
-                  fontSize: isMobile ? 16 : 18,
-                  color: Colors.white.withOpacity(0.7),
-                ),
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 36 : 48,
+          vertical: isMobile ? 14 : 16,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'home.explore_button'.tr(),
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                fontWeight: FontWeight.w800,
+                color: Colors.black,
+                letterSpacing: 0.5,
               ),
             ),
-          ];
-        }
-        
-        final items = widget.cars.map((car) {
-          final carLabel = '${car.device} ${car.model} ${(car.plateNumber ?? '').trim()}'.trim();
-          return PopupMenuItem<int>(
-            value: car.id,
-            height: 56,
-            child: _buildCarLabel(carLabel, isMobile),
-          );
-        }).toList();
-        
-        items.add(
-          PopupMenuItem<int>(
-            value: -1,
-            height: 56,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.add,
-                  size: isMobile ? 18 : 20,
-                  color: const Color(0xFFD4AF37),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'home.add_car'.tr(),
-                  style: TextStyle(
-                    fontSize: isMobile ? 16 : 18,
-                    color: const Color(0xFFD4AF37),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+            const SizedBox(width: 10),
+            Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.black,
+              size: isMobile ? 18 : 20,
             ),
-          ),
-        );
-        
-        return items;
-      },
-      onSelected: (value) {
-        if (value == -1) {
-          Navigator.pushNamed(context, RoutesName.chooseCarScreen);
-        } else if (value != null) {
-          widget.onCarSelected(value);
-        }
-      },
+          ],
+        ),
+      ),
     );
   }
 }
+
+class _WeatherWidget extends StatelessWidget {
+  final bool isMobile;
+
+  const _WeatherWidget({required this.isMobile});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: _msCarbon.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'home.kuwait_city'.tr(),
+                style: TextStyle(
+                  fontSize: isMobile ? 10 : 11,
+                  color: Colors.white.withOpacity(0.85),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                'home.clear'.tr(),
+                style: TextStyle(
+                  fontSize: isMobile ? 9 : 10,
+                  color: Colors.white.withOpacity(0.5),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 10),
+          Icon(
+            Icons.wb_sunny,
+            color: _msOrange,
+            size: isMobile ? 18 : 20,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            'home.temperature'.tr(),
+            style: TextStyle(
+              fontSize: isMobile ? 16 : 18,
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ParticleOverlay extends StatelessWidget {
+  final double particleValue;
+  final bool isMobile;
+
+  const _ParticleOverlay({
+    required this.particleValue,
+    required this.isMobile,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size.infinite,
+      painter: _ParticlePainter(
+        particleValue: particleValue,
+        isMobile: isMobile,
+      ),
+    );
+  }
+}
+
+class _ParticlePainter extends CustomPainter {
+  final double particleValue;
+  final bool isMobile;
+
+  _ParticlePainter({required this.particleValue, required this.isMobile});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.08)
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round;
+
+    final random = math.Random(42);
+    final count = isMobile ? 28 : 48;
+
+    for (var i = 0; i < count; i++) {
+      final x = random.nextDouble() * size.width;
+      final baseY = random.nextDouble() * size.height;
+      final speed = 0.2 + random.nextDouble() * 0.4;
+      final y = (baseY + particleValue * size.height * speed) % size.height;
+      final length = 20 + random.nextDouble() * 60;
+      final angle = random.nextDouble() * 0.3 - 0.15;
+
+      final opacity = 0.03 + random.nextDouble() * 0.08;
+      paint.color = Colors.white.withOpacity(opacity);
+
+      canvas.drawLine(
+        Offset(x, y),
+        Offset(x + length * math.sin(angle), y + length * math.cos(angle)),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ParticlePainter oldDelegate) => true;
+}
+
+class _CinematicBackground extends StatelessWidget {
+  final double shimmerValue;
+  final double glowValue;
+
+  const _CinematicBackground({
+    required this.shimmerValue,
+    required this.glowValue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment(
+            -1.0 + 0.2 * math.sin(shimmerValue * 2 * math.pi),
+            -1.0,
+          ),
+          end: Alignment(
+            1.0 + 0.2 * math.cos(shimmerValue * 2 * math.pi),
+            1.0,
+          ),
+          colors: [
+            _msBlack,
+            _msCharcoal,
+            _msCarbon,
+            _msCharcoal,
+            _msBlack,
+          ],
+          stops: [
+            0.0,
+            0.25 + 0.05 * glowValue,
+            0.5,
+            0.75 - 0.05 * glowValue,
+            1.0,
+          ],
+        ),
+      ),
+    );
+  }
+}
+

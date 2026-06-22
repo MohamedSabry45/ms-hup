@@ -54,7 +54,7 @@ class HomeBottomNavigationBar extends StatelessWidget {
           color: Colors.black,
           border: Border(
             top: BorderSide(
-              color: const Color(0xFFD4AF37).withOpacity(0.3),
+              color: const Color(0xFFF78905).withOpacity(0.3),
               width: 1,
             ),
           ),
@@ -77,7 +77,7 @@ class HomeBottomNavigationBar extends StatelessWidget {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFD4AF37) : Colors.transparent,
+                          color: isSelected ? const Color(0xFFF78905) : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(

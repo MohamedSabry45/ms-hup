@@ -52,17 +52,23 @@ class _InvoicesTabBodyState extends State<_InvoicesTabBody> {
   Widget build(BuildContext context) {
     return BlocBuilder<CustomerInfoCubit, CustomerInfoState>(
       builder: (context, customerState) {
-        final contactId = customerState is CustomerInfoSuccess ? customerState.info.id : 0;
-
-        if (contactId == 0) {
-          return const LoginRequiredView();
-        }
-
-        if (customerState is CustomerInfoLoading || contactId == 0) {
+        if (customerState is CustomerInfoLoading || customerState is CustomerInfoInitial) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
+
+        if (customerState is CustomerInfoSuccess) {
+          if (customerState.info.id == 0) {
+            return const LoginRequiredView();
+          }
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        final contactId = customerState.info.id;
 
         return BlocBuilder<InvoicesCubit, InvoicesState>(
           builder: (context, state) {
@@ -103,15 +109,17 @@ class _InvoicesTabBodyState extends State<_InvoicesTabBody> {
 
             if (state is InvoicesSuccess) {
               if (state.invoices.isEmpty) {
-                return AppCard(
-                  backgroundColor: const Color(0xFF050505),
-                  borderColor: const Color(0xFFD4AF37).withOpacity(0.25),
-                  child: Text(
-                    'No invoices'.tr(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white.withOpacity(0.6),
+                return Center(
+                  child: AppCard(
+                    backgroundColor: const Color(0xFF050505),
+                    borderColor: const Color(0xFFD4AF37).withOpacity(0.25),
+                    child: Text(
+                      'No invoices'.tr(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white.withOpacity(0.6),
+                      ),
                     ),
                   ),
                 );

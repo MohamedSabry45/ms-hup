@@ -64,7 +64,7 @@ class HomeServiceCardsSection extends StatelessWidget {
             color: const Color(0xFF050505).withOpacity(0.5),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: const Color(0xFFD4AF37).withOpacity(0.2),
+              color: const Color(0xFFF78905).withOpacity(0.2),
               width: 1,
             ),
           ),
@@ -77,7 +77,7 @@ class HomeServiceCardsSection extends StatelessWidget {
                 service['tag'] as String,
                 style: TextStyle(
                   fontSize: isMobile ? 9 : 10,
-                  color: const Color(0xFFD4AF37).withOpacity(0.6),
+                  color: const Color(0xFFF78905).withOpacity(0.6),
                   letterSpacing: 2,
                   fontWeight: FontWeight.w500,
                 ),
@@ -87,12 +87,12 @@ class HomeServiceCardsSection extends StatelessWidget {
                 width: isMobile ? 40 : 48,
                 height: isMobile ? 40 : 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withOpacity(0.1),
+                  color: const Color(0xFFF78905).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   service['icon'] as IconData,
-                  color: const Color(0xFFD4AF37),
+                  color: const Color(0xFFF78905),
                   size: isMobile ? 18 : 20,
                 ),
               ),

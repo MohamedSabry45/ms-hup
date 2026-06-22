@@ -10,11 +10,11 @@ class HomePhilosophySection extends StatelessWidget {
     final isMobile = screenWidth < 600;
 
     final principles = [
-      {'text': 'home.philosophy.absolute_protection'.tr(), 'color': const Color(0xFFD4AF37)},
+      {'text': 'home.philosophy.absolute_protection'.tr(), 'color': const Color(0xFFF78905)},
       {'text': 'home.philosophy.zero_compromise'.tr(), 'color': Colors.white},
-      {'text': 'home.philosophy.concierge_care'.tr(), 'color': const Color(0xFFD4AF37)},
+      {'text': 'home.philosophy.concierge_care'.tr(), 'color': const Color(0xFFF78905)},
       {'text': 'home.philosophy.paint_perfection'.tr(), 'color': Colors.white},
-      {'text': 'home.philosophy.unmatched_quality'.tr(), 'color': const Color(0xFFD4AF37)},
+      {'text': 'home.philosophy.unmatched_quality'.tr(), 'color': const Color(0xFFF78905)},
       {'text': 'home.philosophy.legendary_service'.tr(), 'color': Colors.white},
     ];
 
@@ -26,7 +26,7 @@ class HomePhilosophySection extends StatelessWidget {
             'home.philosophy.title'.tr(),
             style: TextStyle(
               fontSize: 10,
-              color: const Color(0xFFD4AF37).withOpacity(0.4),
+              color: const Color(0xFFF78905).withOpacity(0.4),
               letterSpacing: 6,
               fontWeight: FontWeight.w500,
             ),
@@ -34,7 +34,7 @@ class HomePhilosophySection extends StatelessWidget {
           const SizedBox(height: 32),
           ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
-              colors: [Color(0xFFFFFFFF), Color(0xFFD4AF37), Color(0xFFB8942E)],
+              colors: [Color(0xFFFFFFFF), Color(0xFFF78905), Color(0xFFE07A00)],
               stops: [0.0, 0.5, 1.0],
             ).createShader(bounds),
             child: Text(

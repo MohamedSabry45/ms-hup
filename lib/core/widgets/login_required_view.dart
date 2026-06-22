@@ -91,7 +91,7 @@ class LoginRequiredView extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushNamedAndRemoveUntil(
                         context,
-                        RoutesName.enterMobileScreen,
+                        RoutesName.loginScreen,
                         (route) => false,
                       );
                     },

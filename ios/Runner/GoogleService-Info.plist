@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>940276311352-tkfcun36uvju02u1hisrn8sd1p9pnl8b.apps.googleusercontent.com</string>
+	<string>83287093703-dji25inil307utdmmefub3g23d3rcq11.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.940276311352-tkfcun36uvju02u1hisrn8sd1p9pnl8b</string>
+	<string>com.googleusercontent.apps.83287093703-dji25inil307utdmmefub3g23d3rcq11</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>940276311352-90fagka30tsci562plgfdfa9v8930eh0.apps.googleusercontent.com</string>
+	<string>83287093703-54df5tqpicsf3v61incl6sv6kelj1gjq.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyA8Bwtaaq_lN1AviJKvYCKx32cKwgpr3io</string>
+	<string>AIzaSyDROk5mxdoBxuovj75A5v7AlfJQ2Psj73k</string>
 	<key>GCM_SENDER_ID</key>
-	<string>940276311352</string>
+	<string>83287093703</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.legendprotek.com</string>
+	<string>COM.MSHUB.COM</string>
 	<key>PROJECT_ID</key>
-	<string>legendprotek-52968</string>
+	<string>ms-hub-5ea0e</string>
 	<key>STORAGE_BUCKET</key>
-	<string>legendprotek-52968.firebasestorage.app</string>
+	<string>ms-hub-5ea0e.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:940276311352:ios:75d5633a3eed407b5a0dcd</string>
+	<string>1:83287093703:ios:63a3f026438e71baa969e2</string>
 </dict>
 </plist>

@@ -40,7 +40,7 @@ class HomeFleetSection extends StatelessWidget {
                 'home.fleet.title'.tr(),
                 style: TextStyle(
                   fontSize: 12,
-                  color: const Color(0xFFD4AF37),
+                  color: const Color(0xFFF78905),
                   letterSpacing: 4,
                   fontWeight: FontWeight.w500,
                 ),
@@ -48,7 +48,7 @@ class HomeFleetSection extends StatelessWidget {
               const SizedBox(height: 16),
               ShaderMask(
                 shaderCallback: (bounds) => const LinearGradient(
-                  colors: [Color(0xFFD4AF37), Color(0xFFB8942E)],
+                  colors: [Color(0xFFF78905), Color(0xFFE07A00)],
                 ).createShader(bounds),
                 child: Text(
                   'home.fleet.headline'.tr(),
@@ -108,7 +108,7 @@ class _BlogCard extends StatelessWidget {
         padding: EdgeInsets.zero,
         backgroundColor: const Color(0xFF050505),
         borderRadius: 12,
-        borderColor: const Color(0xFFD4AF37).withOpacity(0.2),
+        borderColor: const Color(0xFFF78905).withOpacity(0.2),
         boxShadow: const [
           BoxShadow(
             color: Color(0x1F000000),

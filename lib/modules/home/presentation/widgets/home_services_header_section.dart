@@ -17,7 +17,7 @@ class HomeServicesHeaderSection extends StatelessWidget {
             'home.services_header.title'.tr(),
             style: TextStyle(
               fontSize: 12,
-              color: const Color(0xFFD4AF37),
+              color: const Color(0xFFF78905),
               letterSpacing: 4,
               fontWeight: FontWeight.w500,
             ),
@@ -37,7 +37,7 @@ class HomeServicesHeaderSection extends StatelessWidget {
               const SizedBox(width: 8),
               ShaderMask(
                 shaderCallback: (bounds) => const LinearGradient(
-                  colors: [Color(0xFFD4AF37), Color(0xFFB8942E)],
+                  colors: [Color(0xFFF78905), Color(0xFFE07A00)],
                 ).createShader(bounds),
                 child: Text(
                   'home.services_header.redefined'.tr(),
@@ -70,7 +70,7 @@ class HomeServicesHeaderSection extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  const Color(0xFFD4AF37),
+                  const Color(0xFFF78905),
                   Colors.transparent,
                 ],
               ),

@@ -1,5 +1,5 @@
 class AppStrings {
-    static const String welcomeToGMOTORS = 'مرحباً بك في legendprotek';
+    static const String welcomeToGMOTORS = 'مرحباً بك في MS HUP';
 
   static const String workshopManagement = 'تسجيل دخول ';
   static const String qrScan = 'Scan QR';

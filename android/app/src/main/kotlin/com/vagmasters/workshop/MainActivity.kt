@@ -1,4 +1,4 @@
-package com.legendprotek.com
+package COM.MSHUB.COM
 
 import io.flutter.embedding.android.FlutterActivity
 

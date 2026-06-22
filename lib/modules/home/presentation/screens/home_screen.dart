@@ -11,10 +11,6 @@ import 'package:reservation_workshop/modules/menu/presentation/widgets/menu_draw
 import 'package:reservation_workshop/modules/menu/presentation/cubits/business_location_cubit/business_location_cubit.dart';
 import '../widgets/home_bottom_navigation_bar.dart';
 import '../widgets/home_hero_section.dart';
-import '../widgets/home_philosophy_section.dart';
-import '../widgets/home_services_header_section.dart';
-import '../widgets/home_service_cards_section.dart';
-import '../widgets/home_fleet_section.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,7 +21,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final ScrollController _scrollController = ScrollController();
 
   int _selectedBottomIndex = 0;
   int? _selectedCarId;
@@ -77,9 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final isMobile = screenWidth < 600;
-
     return Directionality(
       textDirection: ui.TextDirection.ltr,
       child: Scaffold(
@@ -104,15 +96,11 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: const BoxDecoration(
             color: Colors.black,
           ),
-          child: CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              // Hero Section
-              SliverToBoxAdapter(
-                child: Stack(
-                  children: [
-                    BlocBuilder<CustomerInfoCubit, CustomerInfoState>(
-                      builder: (context, state) {
+          child: Column(
+            children: [
+              Expanded(
+                child: BlocBuilder<CustomerInfoCubit, CustomerInfoState>(
+                  builder: (context, state) {
                         String name = '';
                         if (!_isGuest && state is CustomerInfoSuccess) {
                           name = state.info.name.trim();
@@ -149,11 +137,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
 
                         return HomeHeroSection(
-                          scrollController: _scrollController,
                           greeting: greeting,
                           carLabel: carLabel,
                           cars: cars,
                           selectedCarId: _selectedCarId,
+                          onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
                           onCarSelected: (carId) async {
                             setState(() => _selectedCarId = carId);
                             if (carId != null) {
@@ -167,81 +155,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
-                    // App Bar with menu only
-                    Positioned(
-                      top: isMobile ? 48 : 56,
-                      left: 12,
-                      right: 12,
-                      child: Container(
-                        height: isMobile ? 85 : 90,
-                        padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF050505).withOpacity(0.92),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: const Color(0xFFD4AF37).withOpacity(0.35),
-                            width: 1.2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.35),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/logoappbar.png',
-                              height: isMobile ? 75 : 85,
-                            ),
-                            const Spacer(),
-                            GestureDetector(
-                              onTap: () => _scaffoldKey.currentState?.openDrawer(),
-                              child: Container(
-                                width: isMobile ? 44 : 52,
-                                height: isMobile ? 44 : 52,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: const Color(0xFFD4AF37).withOpacity(0.15),
-                                  border: Border.all(
-                                    color: const Color(0xFFD4AF37).withOpacity(0.4),
-                                    width: 1.2,
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.menu,
-                                  color: Color(0xFFD4AF37),
-                                  size: 24,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Our Philosophy Section
-              const SliverToBoxAdapter(
-                child: HomePhilosophySection(),
-              ),
-              // Our Services Header Section
-              const SliverToBoxAdapter(
-                child: HomeServicesHeaderSection(),
-              ),
-              // Service Cards Section
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: const HomeServiceCardsSection(),
-                ),
-              ),
-              // Fleet Section
-              const SliverToBoxAdapter(
-                child: HomeFleetSection(),
               ),
             ],
           ),

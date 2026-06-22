@@ -56,6 +56,7 @@ import 'package:reservation_workshop/modules/bookings/presentation/cubits/bookin
 import 'package:reservation_workshop/modules/job_estimators/presentation/cubits/job_estimators_cubit.dart';
 import 'package:reservation_workshop/modules/job_estimators/presentation/screens/job_estimators_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/home_screen.dart';
+import 'package:reservation_workshop/modules/home/presentation/screens/explore_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/spare_parts_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/contact_cars_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/buy_car_screen.dart';
@@ -232,7 +233,7 @@ class MyApp extends StatelessWidget {
             ),
           );
         },
-        home: const FullscreenSplashScreen(),
+        home: isLoggedIn ? const FullscreenSplashScreen() : const GuestSplashScreen(),
         routes: {
           '/fullscreen_splash': (_) => const FullscreenSplashScreen(),
           '/startup': (_) => const StartupDeciderScreen(),
@@ -273,6 +274,7 @@ class MyApp extends StatelessWidget {
                 ],
                 child: const HomeScreen(),
               ),
+          RoutesName.exploreScreen: (_) => const ExploreScreen(),
           RoutesName.sparePartsScreen: (_) => MultiBlocProvider(
                 providers: [
                   BlocProvider<TaxonomyCubit>(create: (_) => TaxonomyCubit()),

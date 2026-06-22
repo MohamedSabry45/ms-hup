@@ -13,6 +13,7 @@ class RoutesName {
   static const String chooseCarScreen = '/choose-car';
   static const String addCarScreen = '/add-car';
   static const String homeScreen = '/home';
+  static const String exploreScreen = '/explore';
   static const String sparePartsScreen = '/spare-parts';
   static const String contactCarsScreen = '/contact-cars';
   static const String buyCarScreen = '/buy-car';
