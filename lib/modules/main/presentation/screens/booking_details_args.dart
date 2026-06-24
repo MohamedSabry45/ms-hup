@@ -5,15 +5,17 @@ class BookingDetailsArgs {
   final String bookingStart;
   final int locationId;
   final int serviceId;
-  final int deviceId;
+  final int? deviceId;
   final String bookingNote;
+  final String? bookingType;
 
   const BookingDetailsArgs({
     required this.model,
     required this.bookingStart,
     required this.locationId,
     required this.serviceId,
-    required this.deviceId,
+    this.deviceId,
     required this.bookingNote,
+    this.bookingType,
   });
 }

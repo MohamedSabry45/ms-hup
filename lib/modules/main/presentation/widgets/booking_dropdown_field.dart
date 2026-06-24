@@ -32,6 +32,8 @@ class BookingDropdownField<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final effectiveFill = fillColor ?? const Color(0xFFE5E7EB);
+    final bool isDark = effectiveFill.computeLuminance() < 0.5;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -51,47 +53,62 @@ class BookingDropdownField<T> extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFFD4AF37),
+                  color: Color(0xFFD4AF37),
                 ),
               ),
             ],
           ],
         ),
         const SizedBox(height: 8),
-        DropdownButtonFormField<T>(
-          value: value,
-          items: items,
-          onChanged: onChanged,
-          dropdownColor: dropdownColor ?? effectiveFill,
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: textColor ?? AppColors.brandDark,
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? Colors.black.withOpacity(0.4) : Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: iconColor ?? textColor ?? AppColors.brandDark,
-          ),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: effectiveFill,
-            hintStyle: textTheme.bodyMedium?.copyWith(
+          child: DropdownButtonFormField<T>(
+            value: value,
+            items: items,
+            onChanged: onChanged,
+            dropdownColor: dropdownColor ?? effectiveFill,
+            style: textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              color: AppColors.grey7,
+              color: textColor ?? AppColors.brandDark,
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.brandOutline),
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: iconColor ?? textColor ?? AppColors.brandDark,
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.brandOutline),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: effectiveFill,
+              hintStyle: textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.grey7,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide(
+                  color: isDark ? const Color(0xFFD4AF37).withOpacity(0.12) : AppColors.brandOutline.withOpacity(0.4),
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: AppColors.brandPrimary, width: 1.5),
+              ),
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.brandPrimary, width: 1.2),
-            ),
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
         ),
       ],

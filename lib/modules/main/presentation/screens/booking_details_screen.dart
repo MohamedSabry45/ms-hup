@@ -49,9 +49,9 @@ class BookingDetailsScreen extends StatelessWidget {
                     Navigator.pop(context);
                   }
                 },
-                child: const Text(
-                  'حسناً',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFFD4AF37)),
+                child: Text(
+                  'common.ok'.tr(),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFFD4AF37)),
                 ),
               ),
             ],
@@ -71,23 +71,35 @@ class BookingDetailsScreen extends StatelessWidget {
     final canConfirm = bookingArgs != null;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF050505),
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF050505),
         elevation: 0,
-        title: const Text(
-          'تفاصيل الحجز',
-          style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.w900),
+        title: Text(
+          'booking_details.title'.tr(),
+          style: const TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.w900),
         ),
         foregroundColor: const Color(0xFFD4AF37),
         iconTheme: const IconThemeData(color: Color(0xFFD4AF37)),
       ),
-      body: BlocConsumer<AddBookingCubit, AddBookingState>(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF0A0A0A),
+              Color(0xFF050505),
+              Color(0xFF000000),
+            ],
+          ),
+        ),
+        child: BlocConsumer<AddBookingCubit, AddBookingState>(
         listener: (context, state) {
           if (state is AddBookingSuccess) {
             _showResultDialog(
               context,
-              title: 'تم تأكيد الحجز',
+              title: 'booking_details.success_title'.tr(),
               message: state.message,
               popScreenAfter: true,
             );
@@ -95,7 +107,7 @@ class BookingDetailsScreen extends StatelessWidget {
           if (state is AddBookingError) {
             _showResultDialog(
               context,
-              title: 'فشل تأكيد الحجز',
+              title: 'booking_details.error_title'.tr(),
               message: state.message,
               popScreenAfter: false,
             );
@@ -108,37 +120,40 @@ class BookingDetailsScreen extends StatelessWidget {
           final isLoading = state is AddBookingLoading;
 
           return SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: Center(
-                    child: BookingDetailsCard(
-                      model: model,
-                      canConfirm: canConfirm,
-                      onBack: () => Navigator.pop(context),
-                      onConfirm: () {
-                        if (!canConfirm || bookingArgs == null) {
-                          return;
-                        }
-                        if (isLoading) {
-                          return;
-                        }
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Center(
+                  child: BookingDetailsCard(
+                    model: model,
+                    canConfirm: canConfirm,
+                    bookingType: bookingArgs?.bookingType,
+                    onBack: () => Navigator.pop(context),
+                    onConfirm: () {
+                      if (!canConfirm || bookingArgs == null) {
+                        return;
+                      }
+                      if (isLoading) {
+                        return;
+                      }
 
-                        context.read<AddBookingCubit>().addBooking(
-                              bookingStart: bookingArgs.bookingStart,
-                              locationId: bookingArgs.locationId,
-                              bookingNote: bookingArgs.bookingNote,
-                              serviceId: bookingArgs.serviceId,
-                              deviceId: bookingArgs.deviceId,
-                            );
-                      },
-                    ),
+                      context.read<AddBookingCubit>().addBooking(
+                            bookingStart: bookingArgs.bookingStart,
+                            locationId: bookingArgs.locationId,
+                            bookingNote: bookingArgs.bookingNote,
+                            serviceId: bookingArgs.serviceId,
+                            deviceId: bookingArgs.deviceId,
+                            bookingType: bookingArgs.bookingType,
+                          );
+                    },
                   ),
                 ),
-              ],
+              ),
             ),
           );
         },
+      ),
       ),
     );
   }

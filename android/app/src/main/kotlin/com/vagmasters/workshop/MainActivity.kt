@@ -1,4 +1,4 @@
-package COM.MSHUB.COM
+package com.mshib.com
 
 import io.flutter.embedding.android.FlutterActivity
 

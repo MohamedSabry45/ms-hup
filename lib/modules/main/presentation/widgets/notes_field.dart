@@ -7,43 +7,67 @@ class NotesField extends StatelessWidget {
     super.key,
     required this.hintText,
     required this.controller,
+    this.fillColor,
+    this.textColor,
+    this.hintColor,
   });
 
   final String hintText;
   final TextEditingController controller;
+  final Color? fillColor;
+  final Color? textColor;
+  final Color? hintColor;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return TextFormField(
-      controller: controller,
-      minLines: 3,
-      maxLines: 5,
-      style: textTheme.bodyMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-        color: AppColors.brandDark,
+    final effectiveFill = fillColor ?? const Color(0xFFE5E7EB);
+    final bool isDark = effectiveFill.computeLuminance() < 0.5;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withOpacity(0.4) : Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      decoration: InputDecoration(
-        hintText: hintText,
-        filled: true,
-        fillColor: const Color(0xFFE5E7EB),
-        hintStyle: textTheme.bodyMedium?.copyWith(
+      child: TextFormField(
+        controller: controller,
+        minLines: 3,
+        maxLines: 5,
+        style: textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.w600,
-          color: AppColors.grey7,
+          color: textColor ?? AppColors.brandDark,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.brandOutline),
+        decoration: InputDecoration(
+          hintText: hintText,
+          filled: true,
+          fillColor: effectiveFill,
+          hintStyle: textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: hintColor ?? AppColors.grey7,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(
+              color: isDark ? const Color(0xFFD4AF37).withOpacity(0.12) : AppColors.brandOutline.withOpacity(0.4),
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: AppColors.brandPrimary, width: 1.5),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.brandOutline),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.brandPrimary, width: 1.2),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       ),
     );
   }

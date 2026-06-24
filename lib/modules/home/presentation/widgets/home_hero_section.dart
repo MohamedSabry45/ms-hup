@@ -1,10 +1,15 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:video_player/video_player.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 import 'package:reservation_workshop/config/routes/routes_name.dart';
 import 'package:reservation_workshop/modules/customer/domain/entities/customer_car.dart';
+import 'package:reservation_workshop/modules/weather/presentation/cubits/weather_cubit/weather_cubit.dart';
+import 'package:reservation_workshop/modules/weather/data/repositories/weather_repository.dart';
 
 const Color _msOrange = Color(0xFFF78905);
 const Color _msBlack = Color(0xFF000000);
@@ -40,6 +45,8 @@ class _HomeHeroSectionState extends State<HomeHeroSection>
   late final AnimationController _particleController;
   late VideoPlayerController _videoController;
   bool _videoReady = false;
+  String _userLocation = 'cairo';
+  Key _weatherKey = UniqueKey();
 
   @override
   void initState() {
@@ -70,6 +77,65 @@ class _HomeHeroSectionState extends State<HomeHeroSection>
       }).catchError((_) {
         // Video failed to load; fallback gradient is already showing.
       });
+
+    _getUserLocation();
+  }
+
+  Future<void> _getUserLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return;
+    }
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      if (mounted) {
+        // Use geocoding to get city name from coordinates
+        final placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+
+        String locationName = 'Cairo';
+        if (placemarks.isNotEmpty) {
+          locationName = placemarks.first.locality ?? 
+                       placemarks.first.subAdministrativeArea ?? 
+                       placemarks.first.administrativeArea ?? 
+                       'Cairo';
+        }
+
+        setState(() {
+          _userLocation = locationName;
+          _weatherKey = UniqueKey(); // Force rebuild of weather widget
+        });
+      }
+    } catch (e) {
+      // Keep default city on error
+      if (mounted) {
+        setState(() {
+          _userLocation = 'Cairo';
+          _weatherKey = UniqueKey(); // Force rebuild of weather widget
+        });
+      }
+    }
   }
 
   @override
@@ -184,7 +250,14 @@ class _HomeHeroSectionState extends State<HomeHeroSection>
                           ),
                         ),
                       ),
-                    _WeatherWidget(isMobile: isMobile),
+                    BlocProvider(
+                      key: _weatherKey,
+                      create: (_) => WeatherCubit(WeatherRepository()),
+                      child: _WeatherWidget(
+                        isMobile: isMobile,
+                        initialLocation: _userLocation,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -328,63 +401,113 @@ class _ExploreButton extends StatelessWidget {
   }
 }
 
-class _WeatherWidget extends StatelessWidget {
+class _WeatherWidget extends StatefulWidget {
   final bool isMobile;
+  final String initialLocation;
 
-  const _WeatherWidget({required this.isMobile});
+  const _WeatherWidget({
+    required this.isMobile,
+    required this.initialLocation,
+  });
+
+  @override
+  State<_WeatherWidget> createState() => _WeatherWidgetState();
+}
+
+class _WeatherWidgetState extends State<_WeatherWidget> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WeatherCubit>().loadWeather(widget.initialLocation);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: _msCarbon.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+    return BlocBuilder<WeatherCubit, WeatherState>(
+      builder: (context, state) {
+        String location = widget.initialLocation;
+        String condition = 'Clear';
+        double temperature = 32.0;
+        IconData icon = Icons.wb_sunny;
+
+        if (state is WeatherLoaded) {
+          location = state.weather.location;
+          condition = state.weather.condition;
+          temperature = state.weather.temperature;
+          icon = _getIconFromString(state.weather.icon);
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: _msCarbon.withOpacity(0.7),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.1),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'home.kuwait_city'.tr(),
-                style: TextStyle(
-                  fontSize: isMobile ? 10 : 11,
-                  color: Colors.white.withOpacity(0.85),
-                  fontWeight: FontWeight.w600,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    location,
+                    style: TextStyle(
+                      fontSize: widget.isMobile ? 10 : 11,
+                      color: Colors.white.withOpacity(0.85),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    condition,
+                    style: TextStyle(
+                      fontSize: widget.isMobile ? 9 : 10,
+                      color: Colors.white.withOpacity(0.5),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(width: 10),
+              Icon(
+                icon,
+                color: _msOrange,
+                size: widget.isMobile ? 18 : 20,
+              ),
+              const SizedBox(width: 6),
               Text(
-                'home.clear'.tr(),
+                '${temperature.toStringAsFixed(0)}°C',
                 style: TextStyle(
-                  fontSize: isMobile ? 9 : 10,
-                  color: Colors.white.withOpacity(0.5),
+                  fontSize: widget.isMobile ? 16 : 18,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(width: 10),
-          Icon(
-            Icons.wb_sunny,
-            color: _msOrange,
-            size: isMobile ? 18 : 20,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            'home.temperature'.tr(),
-            style: TextStyle(
-              fontSize: isMobile ? 16 : 18,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  IconData _getIconFromString(String iconString) {
+    switch (iconString) {
+      case 'wb_sunny':
+        return Icons.wb_sunny;
+      case 'cloud':
+        return Icons.cloud;
+      case 'thunderstorm':
+        return Icons.thunderstorm;
+      case 'grain':
+        return Icons.grain;
+      case 'ac_unit':
+        return Icons.ac_unit;
+      default:
+        return Icons.wb_sunny;
+    }
   }
 }
 

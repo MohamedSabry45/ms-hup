@@ -8,14 +8,18 @@ import 'package:reservation_workshop/core/widgets/login_required_view.dart';
 
 import '../cubit/vehicles_cubit.dart';
 import '../cubit/vehicles_state.dart';
-import '../widgets/vehicle_card.dart';
 import '../widgets/add_vehicle_dialog.dart';
 import '../widgets/vehicle_filters_dialog.dart';
 import 'vehicle_details_screen.dart';
 
-class BuyCarScreen extends StatelessWidget {
+class BuyCarScreen extends StatefulWidget {
   const BuyCarScreen({super.key});
 
+  @override
+  State<BuyCarScreen> createState() => _BuyCarScreenState();
+}
+
+class _BuyCarScreenState extends State<BuyCarScreen> {
   void _showFiltersDialog(BuildContext context) async {
     final result = await showDialog<Map<String, dynamic>?>(
       context: context,
@@ -52,25 +56,6 @@ class BuyCarScreen extends StatelessWidget {
     final isGuest = CacheHelper.getData<bool>(key: PrefKeys.kIsGuestMode) ?? false;
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'menu.buy_car'.tr(),
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, color: Colors.white),
-        ),
-        foregroundColor: Colors.white,
-        actions: isGuest
-            ? const []
-            : [
-                IconButton(
-                  onPressed: () => _showFiltersDialog(context),
-                  icon: const Icon(Icons.tune_outlined),
-                  tooltip: 'buy_car.filter'.tr(),
-                ),
-              ],
-      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -88,87 +73,54 @@ class BuyCarScreen extends StatelessWidget {
               ? const LoginRequiredView()
               : BlocBuilder<VehiclesCubit, VehiclesState>(
                   builder: (context, state) {
-            if (state is VehiclesInitial) {
-              context.read<VehiclesCubit>().loadFirst();
-            }
+                    if (state is VehiclesInitial) {
+                      context.read<VehiclesCubit>().loadFirst();
+                    }
 
-            if (state is VehiclesLoading || state is VehiclesInitial) {
-              return ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                itemCount: 6,
-                separatorBuilder: (_, __) => const SizedBox(height: 14),
-                itemBuilder: (context, index) {
-                  return const _VehicleCardSkeleton();
-                },
-              );
-            }
+                    if (state is VehiclesLoading || state is VehiclesInitial) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: AppColors.brandPrimary),
+                      );
+                    }
 
-            if (state is VehiclesError) {
-              return _VehiclesErrorView(
-                message: state.message,
-                onRetry: () => context.read<VehiclesCubit>().loadFirst(),
-              );
-            }
+                    if (state is VehiclesError) {
+                      return _VehiclesErrorView(
+                        message: state.message,
+                        onRetry: () => context.read<VehiclesCubit>().loadFirst(),
+                      );
+                    }
 
-            if (state is VehiclesSuccess) {
-              if (state.vehicles.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.search_off,
-                        size: 64,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'buy_car.no_vehicles'.tr(),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return NotificationListener<ScrollNotification>(
-                onNotification: (notification) {
-                  if (notification.metrics.pixels >= (notification.metrics.maxScrollExtent - 240)) {
-                    context.read<VehiclesCubit>().loadMore();
-                  }
-                  return false;
-                },
-                child: RefreshIndicator(
-                  onRefresh: () => context.read<VehiclesCubit>().refresh(),
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                    itemCount: state.vehicles.length + (state.isLoadingMore ? 1 : 0),
-                    separatorBuilder: (_, __) => const SizedBox(height: 14),
-                    itemBuilder: (context, index) {
-                      if (index >= state.vehicles.length) {
-                        return const _VehicleCardSkeleton();
+                    if (state is VehiclesSuccess) {
+                      if (state.vehicles.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'buy_car.no_vehicles'.tr(),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       }
 
-                      final vehicle = state.vehicles[index];
-                      return VehicleCard(
-                        vehicle: vehicle,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => VehicleDetailsScreen(vehicleId: vehicle.id),
-                            ),
-                          );
-                        },
+                      return VehicleDetailsScreen(
+                        vehicles: state.vehicles,
+                        onFilterPressed: isGuest ? null : () => _showFiltersDialog(context),
                       );
-                    },
-                  ),
-                ),
-              );
-            }
+                    }
 
-            return const SizedBox.shrink();
-          },
+                    return const SizedBox.shrink();
+                  },
                 ),
         ),
       ),
@@ -195,22 +147,6 @@ class BuyCarScreen extends StatelessWidget {
               },
               child: const Icon(Icons.add),
             ),
-    );
-  }
-}
-
-class _VehicleCardSkeleton extends StatelessWidget {
-  const _VehicleCardSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 280,
-      decoration: BoxDecoration(
-        color: const Color(0xFF050505),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFF0A0A0A)),
-      ),
     );
   }
 }
@@ -263,35 +199,3 @@ class _VehiclesErrorView extends StatelessWidget {
   }
 }
 
-class _VehiclesEmptyView extends StatelessWidget {
-  final Future<void> Function() onRefresh;
-
-  const _VehiclesEmptyView({required this.onRefresh});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      child: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          const SizedBox(height: 80),
-          const Icon(Icons.directions_car, color: Colors.grey, size: 52),
-          const SizedBox(height: 12),
-          Text(
-            'buy_car.no_vehicles'.tr(),
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'buy_car.pull_to_refresh'.tr(),
-            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70, fontWeight: FontWeight.w600),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}

@@ -323,7 +323,20 @@ class _MainScreenState extends State<MainScreen> {
                                             const SizedBox(height: AppSpacing.lg),
                                             BlocBuilder<BranchCubit, BranchState>(
                                               builder: (context, branchState) {
-                                                final branches = branchState is BranchSuccess ? branchState.branches : const <Branch>[];
+                                                final branches = branchState is BranchSuccess
+                                                    ? branchState.branches.where((b) => b.isCarStation == 1).toList()
+                                                    : const <Branch>[];
+
+                                                if (_selectedBranchId != null && !branches.any((b) => b.id == _selectedBranchId)) {
+                                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                    if (!mounted) return;
+                                                    setState(() {
+                                                      _selectedBranchId = null;
+                                                      _selectedServiceId = null;
+                                                    });
+                                                    context.read<ServiceCubit>().clear();
+                                                  });
+                                                }
 
                                                 return BookingDropdownField<int>(
                                                   label: 'اختر الفرع',

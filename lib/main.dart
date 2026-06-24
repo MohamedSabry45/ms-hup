@@ -57,6 +57,8 @@ import 'package:reservation_workshop/modules/job_estimators/presentation/cubits/
 import 'package:reservation_workshop/modules/job_estimators/presentation/screens/job_estimators_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/home_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/explore_screen.dart';
+import 'package:reservation_workshop/modules/home/presentation/screens/simulator_detail_screen.dart';
+import 'package:reservation_workshop/modules/home/presentation/screens/barber_detail_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/spare_parts_screen.dart';
 import 'package:reservation_workshop/modules/spare_parts/presentation/screens/spare_parts_cart_screen.dart';
 import 'package:reservation_workshop/modules/home/presentation/screens/contact_cars_screen.dart';
@@ -276,6 +278,8 @@ class MyApp extends StatelessWidget {
                 child: const HomeScreen(),
               ),
           RoutesName.exploreScreen: (_) => const ExploreScreen(),
+          RoutesName.simulatorDetailScreen: (_) => const SimulatorDetailScreen(),
+          RoutesName.barberDetailScreen: (_) => const BarberDetailScreen(),
           RoutesName.sparePartsScreen: (_) => MultiBlocProvider(
                 providers: [
                   BlocProvider<TaxonomyCubit>(create: (_) => TaxonomyCubit()),
@@ -298,6 +302,17 @@ class MyApp extends StatelessWidget {
               ),
           RoutesName.invoiceDetailsScreen: (_) => const InvoiceDetailsScreen(),
           RoutesName.mainScreen: (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider<CustomerInfoCubit>(create: (_) => CustomerInfoCubit()),
+                  BlocProvider<BranchCubit>(create: (_) => BranchCubit()),
+                  BlocProvider<ServiceCubit>(create: (_) => ServiceCubit()),
+                  BlocProvider<JobOrdersCubit>(create: (_) => JobOrdersCubit()),
+                  BlocProvider<JobEstimatorsCubit>(create: (_) => JobEstimatorsCubit()),
+                  BlocProvider<MaintenanceNotificationsCubit>(create: (_) => MaintenanceNotificationsCubit()),
+                ],
+                child: const RequestsTabsScreen(),
+              ),
+          RoutesName.requestsTabsScreen: (_) => MultiBlocProvider(
                 providers: [
                   BlocProvider<CustomerInfoCubit>(create: (_) => CustomerInfoCubit()),
                   BlocProvider<BranchCubit>(create: (_) => BranchCubit()),

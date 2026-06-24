@@ -1,38 +1,176 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:reservation_workshop/config/style/app_colors.dart';
 
+import '../../domain/entities/vehicle.dart';
 import '../cubit/vehicle_details_cubit.dart';
 import '../cubit/vehicle_details_state.dart';
-import '../widgets/vehicle_details/vehicle_badges.dart';
-import '../widgets/vehicle_details/vehicle_description_section.dart';
-import '../widgets/vehicle_details/vehicle_gallery.dart';
-import '../widgets/vehicle_details/vehicle_seller_card.dart';
-import '../widgets/vehicle_details/vehicle_specs_grid.dart';
 import '../widgets/vehicle_details/vehicle_inquiry_dialog.dart';
 
-class VehicleDetailsScreen extends StatelessWidget {
-  final int vehicleId;
+class VehicleDetailsScreen extends StatefulWidget {
+  final List<Vehicle> vehicles;
+  final int initialIndex;
+  final VoidCallback? onFilterPressed;
 
   const VehicleDetailsScreen({
     super.key,
-    required this.vehicleId,
+    required this.vehicles,
+    this.initialIndex = 0,
+    this.onFilterPressed,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider<VehicleDetailsCubit>(
-      create: (_) => VehicleDetailsCubit(id: vehicleId)..load(),
-      child: const _VehicleDetailsView(),
-    );
-  }
+  State<VehicleDetailsScreen> createState() => _VehicleDetailsScreenState();
 }
 
-class _VehicleDetailsView extends StatelessWidget {
-  const _VehicleDetailsView();
+class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
+  late final PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void didUpdateWidget(VehicleDetailsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.vehicles.length != oldWidget.vehicles.length ||
+        widget.vehicles.isEmpty != oldWidget.vehicles.isEmpty ||
+        (widget.vehicles.isNotEmpty && oldWidget.vehicles.isNotEmpty &&
+         widget.vehicles.first.id != oldWidget.vehicles.first.id)) {
+      _currentIndex = 0;
+      _pageController.jumpToPage(0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _next() {
+    if (_currentIndex < widget.vehicles.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _previous() {
+    if (_currentIndex > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        PageView.builder(
+          controller: _pageController,
+          onPageChanged: (index) => setState(() => _currentIndex = index),
+          itemCount: widget.vehicles.length,
+          itemBuilder: (context, index) {
+            return BlocProvider<VehicleDetailsCubit>(
+              create: (_) => VehicleDetailsCubit(id: widget.vehicles[index].id)..load(),
+              child: _VehicleDetailPage(
+                vehicle: widget.vehicles[index],
+                onInquiry: () => _showInquiryDialog(context, widget.vehicles[index].id),
+              ),
+            );
+          },
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _TopNavButton(
+                    icon: Icons.arrow_back,
+                    onTap: () => Navigator.pop(context),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        'buy_car.showroom'.tr().toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: _msOrange,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${_currentIndex + 1}/${widget.vehicles.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      if (widget.onFilterPressed != null) ...[
+                        const SizedBox(width: 8),
+                        _TopNavButton(
+                          icon: Icons.tune_outlined,
+                          onTap: widget.onFilterPressed,
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          bottom: 0,
+          left: 16,
+          child: Center(
+            child: _NavArrow(
+              icon: Icons.arrow_back_ios,
+              onTap: _currentIndex > 0 ? _previous : null,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          bottom: 0,
+          right: 16,
+          child: Center(
+            child: _NavArrow(
+              icon: Icons.arrow_forward_ios,
+              onTap: _currentIndex < widget.vehicles.length - 1 ? _next : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   void _showInquiryDialog(BuildContext context, int vehicleId) {
     showDialog(
@@ -40,330 +178,324 @@ class _VehicleDetailsView extends StatelessWidget {
       builder: (context) => VehicleInquiryDialog(vehicleId: vehicleId),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: BlocBuilder<VehicleDetailsCubit, VehicleDetailsState>(
-          builder: (context, state) {
-            if (state is VehicleDetailsLoading || state is VehicleDetailsInitial) {
-              return const Center(child: CircularProgressIndicator(color: AppColors.brandPrimary));
-            }
-
-            if (state is VehicleDetailsError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.wifi_off, color: Colors.white70, size: 44),
-                      const SizedBox(height: 12),
-                      Text(
-                        'buy_car.loading_error'.tr(),
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, color: Colors.white),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        state.message,
-                        style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70, fontWeight: FontWeight.w600),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 14),
-                      FilledButton(
-                        onPressed: () => context.read<VehicleDetailsCubit>().load(),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.brandPrimary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        ),
-                        child: Text('buy_car.retry'.tr()),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            if (state is VehicleDetailsSuccess) {
-              final d = state.details;
-              final media = d.media;
-
-              return Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-                    child: AspectRatio(
-                      aspectRatio: 16 / 10,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          VehicleGallery(media: media),
-                          Positioned(
-                            top: 12,
-                            left: 12,
-                            child: _TopNavButton(
-                              icon: Icons.arrow_back,
-                              onTap: () => Navigator.of(context).maybePop(),
-                            ),
-                          ),
-                          Positioned(
-                            top: 12,
-                            right: 12,
-                            child: Row(
-                              children: [
-                                _TopNavButton(icon: Icons.share_outlined, onTap: () {}),
-                                const SizedBox(width: 10),
-                                _TopNavButton(
-                                  icon: d.isFavorited ? Icons.favorite : Icons.favorite_border,
-                                  onTap: () {},
-                                ),
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            left: 12,
-                            right: 12,
-                            bottom: 12,
-                            child: VehicleBadges(isPremium: d.isPremium, isFeatured: d.isFeatured),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                '${d.make} ${d.modelName} ${d.year}',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(Icons.location_on_outlined, size: 18, color: Colors.white70),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                [d.locationCity, d.locationArea].where((e) => e.trim().isNotEmpty).join(', '),
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF050505),
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(color: const Color(0xFF0A0A0A)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${d.listingPrice} ${d.currency}',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  color: AppColors.brandPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              if (d.minPrice.trim().isNotEmpty)
-                                Text(
-                                  'Min: ${d.minPrice} ${d.currency}',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.grey7,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        VehicleSpecsGrid(
-                          items: buildSpecs(
-                            mileageKm: d.mileageKm,
-                            transmission: d.transmission,
-                            fuelType: d.fuelType,
-                            engineCapacityCc: d.engineCapacityCc,
-                            cylinderCount: d.cylinderCount,
-                            condition: d.condition,
-                            factoryPaint: d.factoryPaint,
-                            importedSpecs: d.importedSpecs,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        VehicleDescriptionSection(
-                          description: d.description,
-                          conditionNotes: d.conditionNotes,
-                        ),
-                        const SizedBox(height: 12),
-                        if (d.seller != null) VehicleSellerCard(seller: d.seller!),
-                        const SizedBox(height: 14),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(4),
-                          child: _ActionButton(
-                            icon: Icons.handshake,
-                            label: 'buy_car.make_offer'.tr(),
-                            onTap: () => _showInquiryDialog(context, d.id),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _ActionButton(
-                                icon: Icons.chat,
-                                label: 'buy_car.whatsapp'.tr(),
-                                onTap: () async {
-                                  final mobile = d.seller?.mobile;
-                                  if (mobile != null && mobile.trim().isNotEmpty) {
-                                    final whatsappUrl = Uri.parse('https://wa.me/$mobile');
-                                    final ok = await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
-                                    if (!ok && context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('buy_car.whatsapp_failed'.tr())),
-                                      );
-                                    }
-                                  } else if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('buy_car.no_phone'.tr())),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _ActionButton(
-                                icon: Icons.call,
-                                label: 'buy_car.call'.tr(),
-                                onTap: () async {
-                                  final mobile = d.seller?.mobile;
-                                  if (mobile != null && mobile.trim().isNotEmpty) {
-                                    final phoneUrl = Uri.parse('tel:$mobile');
-                                    final ok = await launchUrl(phoneUrl, mode: LaunchMode.externalApplication);
-                                    if (!ok && context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('buy_car.call_failed'.tr())),
-                                      );
-                                    }
-                                  } else if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('buy_car.no_phone'.tr())),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }
-
-            return const SizedBox.shrink();
-          },
-        ),
-      ),
-    );
-  }
 }
+
+const Color _msOrange = Color(0xFFF78905);
 
 class _TopNavButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _TopNavButton({
     required this.icon,
-    required this.onTap,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFF050505).withOpacity(0.92),
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: SizedBox(
-          width: 40,
-          height: 40,
-          child: Icon(icon, color: AppColors.brandDark),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: onTap != null ? Colors.black.withOpacity(0.5) : Colors.black.withOpacity(0.2),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white.withOpacity(0.15)),
+        ),
+        child: Icon(
+          icon,
+          color: onTap != null ? Colors.white : Colors.white.withOpacity(0.3),
+          size: 20,
         ),
       ),
     );
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
+class _VehicleDetailPage extends StatelessWidget {
+  final Vehicle vehicle;
+  final VoidCallback onInquiry;
 
-  const _ActionButton({
+  const _VehicleDetailPage({
+    required this.vehicle,
+    required this.onInquiry,
+  });
+
+  String _formatNumber(num value) {
+    final s = value.toStringAsFixed(0);
+    final buf = StringBuffer();
+    for (int i = 0; i < s.length; i++) {
+      final idxFromEnd = s.length - i;
+      buf.write(s[i]);
+      if (idxFromEnd > 1 && idxFromEnd % 3 == 1) {
+        buf.write(',');
+      }
+    }
+    final raw = buf.toString();
+    return raw.endsWith(',') ? raw.substring(0, raw.length - 1) : raw;
+  }
+
+  String _formatPrice(String raw) {
+    final parsed = double.tryParse(raw) ?? double.tryParse(raw.replaceAll(',', ''));
+    if (parsed == null) return raw;
+    return _formatNumber(parsed);
+  }
+
+  String _engineText(int cc, int cylinders) {
+    final liters = (cc / 1000).toStringAsFixed(1);
+    return '$liters\u200bL I$cylinders ${cylinders > 1 ? 'Twin-Turbo' : ''}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<VehicleDetailsCubit, VehicleDetailsState>(
+      builder: (context, state) {
+        final d = state is VehicleDetailsSuccess ? state.details : null;
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildImage(d?.primaryMedia?.filePath ?? vehicle.primaryImageUrl),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.4),
+                    Colors.black.withOpacity(0.0),
+                    Colors.black.withOpacity(0.65),
+                    Colors.black.withOpacity(0.95),
+                  ],
+                  stops: const [0.0, 0.35, 0.65, 1.0],
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 100, 20, 90),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: _msOrange,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'buy_car.for_sale'.tr().toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          vehicle.year.toString(),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      '${vehicle.make} ${vehicle.modelName}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                        height: 1.05,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'buy_car.tagline'.tr(),
+                      style: TextStyle(
+                        color: _msOrange.withOpacity(0.9),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      d?.description ?? '',
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.55),
+                        fontSize: 14,
+                        height: 1.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 10,
+                      children: [
+                        _SpecPill(
+                          icon: Icons.speed_outlined,
+                          value: '${_formatNumber(vehicle.mileageKm)} KM',
+                        ),
+                        _SpecPill(
+                          icon: Icons.settings_outlined,
+                          value: d?.transmission ?? vehicle.bodyType,
+                        ),
+                        _SpecPill(
+                          icon: Icons.calendar_today_outlined,
+                          value: vehicle.year.toString(),
+                        ),
+                        if (d != null && d.engineCapacityCc > 0)
+                          _SpecPill(
+                            icon: Icons.bolt_outlined,
+                            value: _engineText(d.engineCapacityCc, d.cylinderCount),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              _formatPrice(vehicle.listingPrice),
+                              style: const TextStyle(
+                                color: _msOrange,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              vehicle.currency,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.6),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        GestureDetector(
+                          onTap: onInquiry,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: _msOrange,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Text(
+                              'buy_car.inquire'.tr(),
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildImage(String? url) {
+    if (url != null && url.isNotEmpty) {
+      return Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _placeholderImage(),
+      );
+    }
+    return _placeholderImage();
+  }
+
+  Widget _placeholderImage() {
+    return Container(
+      color: const Color(0xFF0A0A0A),
+      alignment: Alignment.center,
+      child: const Icon(Icons.directions_car, color: AppColors.grey7, size: 64),
+    );
+  }
+}
+
+class _NavArrow extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const _NavArrow({
     required this.icon,
-    required this.label,
-    required this.onTap,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFF050505),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Ink(
-          height: 50,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF0A0A0A)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 18, color: AppColors.brandDark),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.brandDark),
-                ),
-              ),
-            ],
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: onTap != null ? Colors.white.withOpacity(0.12) : Colors.white.withOpacity(0.04),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: onTap != null ? Colors.white : Colors.white.withOpacity(0.3),
+          size: 18,
         ),
       ),
+    );
+  }
+}
+
+class _SpecPill extends StatelessWidget {
+  final IconData icon;
+  final String value;
+
+  const _SpecPill({
+    required this.icon,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: _msOrange),
+        const SizedBox(width: 6),
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.75),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }

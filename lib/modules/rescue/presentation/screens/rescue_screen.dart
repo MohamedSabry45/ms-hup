@@ -265,259 +265,120 @@ class _RescueScreenState extends State<RescueScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37).withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: const Color.fromARGB(179, 100, 116, 139),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: const Icon(
-                                          Icons.directions_car_rounded,
-                                          size: 22,
-                                          color: Colors.white70,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        'rescue.section_request_data'.tr(),
-                                        style: textTheme.titleLarge?.copyWith(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 24),
-                                  _buildModernDropdown(
-                                    label: 'rescue.label_car'.tr(),
-                                    icon: Icons.directions_car_filled_rounded,
-                                    value: _deviceId,
-                                    items: state.cars
-                                        .map(
-                                          (c) => DropdownMenuItem<int>(
-                                            value: c.id,
-                                            child: Text(
-                                              '${c.device} ${c.model} ${(c.plateNumber ?? '').trim()}'.trim(),
-                                              style: const TextStyle(fontSize: 14),
-                                            ),
+                            _buildSection(
+                              title: 'rescue.section_request_data'.tr(),
+                              icon: Icons.directions_car_rounded,
+                              children: [
+                                _buildSimpleDropdown(
+                                  label: 'rescue.label_car'.tr(),
+                                  value: _deviceId,
+                                  items: state.cars
+                                      .map(
+                                        (c) => DropdownMenuItem<int>(
+                                          value: c.id,
+                                          child: Text(
+                                            '${c.device} ${c.model} ${(c.plateNumber ?? '').trim()}'.trim(),
+                                            style: const TextStyle(fontSize: 14),
                                           ),
-                                        )
-                                        .toList(),
-                                    onChanged: (v) => setState(() => _deviceId = v),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _buildModernDropdown(
-                                    label: 'rescue.label_branch'.tr(),
-                                    icon: Icons.location_city_rounded,
-                                    value: _locationId,
-                                    items: state.branches
-                                        .map(
-                                          (b) => DropdownMenuItem<int>(
-                                            value: b.id,
-                                            child: Text(
-                                              b.name,
-                                              style: const TextStyle(fontSize: 14),
-                                            ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (v) => setState(() => _deviceId = v),
+                                ),
+                                const SizedBox(height: 16),
+                                _buildSimpleDropdown(
+                                  label: 'rescue.label_branch'.tr(),
+                                  value: _locationId,
+                                  items: state.branches
+                                      .where((b) => b.isCarStation == 1)
+                                      .map(
+                                        (b) => DropdownMenuItem<int>(
+                                          value: b.id,
+                                          child: Text(
+                                            b.name,
+                                            style: const TextStyle(fontSize: 14),
                                           ),
-                                        )
-                                        .toList(),
-                                    onChanged: (v) {
-                                      setState(() {
-                                        _locationId = v;
-                                        _serviceId = null;
-                                      });
-                                      if (v != null) {
-                                        context.read<RescueCubit>().loadServices(locationId: v);
-                                      }
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _buildModernDropdown(
-                                    label: 'rescue.label_service'.tr(),
-                                    icon: Icons.build_circle_rounded,
-                                    value: _serviceId,
-                                    items: state.services
-                                        .map(
-                                          (s) => DropdownMenuItem<int>(
-                                            value: s.id,
-                                            child: Text(
-                                              s.name,
-                                              style: const TextStyle(fontSize: 14),
-                                            ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (v) {
+                                    setState(() {
+                                      _locationId = v;
+                                      _serviceId = null;
+                                    });
+                                    if (v != null) {
+                                      context.read<RescueCubit>().loadServices(locationId: v);
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                _buildSimpleDropdown(
+                                  label: 'rescue.label_service'.tr(),
+                                  value: _serviceId,
+                                  items: state.services
+                                      .map(
+                                        (s) => DropdownMenuItem<int>(
+                                          value: s.id,
+                                          child: Text(
+                                            s.name,
+                                            style: const TextStyle(fontSize: 14),
                                           ),
-                                        )
-                                        .toList(),
-                                    onChanged: (v) => setState(() => _serviceId = v),
-                                  ),
-                                ],
-                              ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (v) => setState(() => _serviceId = v),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37).withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: const Color.fromARGB(20, 255, 255, 255)),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.20),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: const Color.fromARGB(38, 139, 92, 246),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: const Icon(
-                                          Icons.access_time_rounded,
-                                          size: 22,
-                                          color: Colors.white70,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        'rescue.section_datetime_location'.tr(),
-                                        style: textTheme.titleLarge?.copyWith(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 24),
-                                  _buildDateTimeField(
-                                    label: 'rescue.label_booking_start'.tr(),
-                                    value: _formatDateTime(_bookingStart),
-                                    onTap: _pickBookingStart,
-                                    icon: Icons.calendar_today_rounded,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _buildLocationField(
-                                    label: 'rescue.label_location'.tr(),
-                                    value: _locationLabel(),
-                                    onTap: _pickLocationFromMap,
-                                    hasLocation: _pickupLat != null && _pickupLng != null,
-                                  ),
-                                ],
-                              ),
+                            const SizedBox(height: 20),
+                            _buildSection(
+                              title: 'rescue.section_datetime_location'.tr(),
+                              icon: Icons.access_time_rounded,
+                              children: [
+                                _buildSimpleField(
+                                  label: 'rescue.label_booking_start'.tr(),
+                                  value: _formatDateTime(_bookingStart),
+                                  onTap: _pickBookingStart,
+                                ),
+                                const SizedBox(height: 16),
+                                _buildSimpleField(
+                                  label: 'rescue.label_location'.tr(),
+                                  value: _locationLabel(),
+                                  onTap: _pickLocationFromMap,
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37).withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: const Color.fromARGB(20, 255, 255, 255)),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.20),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 4),
+                            const SizedBox(height: 20),
+                            _buildSection(
+                              title: 'rescue.section_notes'.tr(),
+                              icon: Icons.note_alt_rounded,
+                              children: [
+                                TextFormField(
+                                  controller: _noteController,
+                                  maxLines: 3,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    height: 1.5,
+                                    color: Colors.white,
                                   ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF59E0B).withOpacity(0.15),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: const Icon(
-                                          Icons.note_alt_rounded,
-                                          size: 22,
-                                          color: Colors.white70,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        'rescue.section_notes'.tr(),
-                                        style: textTheme.titleLarge?.copyWith(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 20),
-                                  TextFormField(
-                                    controller: _noteController,
-                                    maxLines: 4,
-                                    style: const TextStyle(
+                                  decoration: InputDecoration(
+                                    hintText: 'rescue.notes_hint'.tr(),
+                                    hintStyle: const TextStyle(
+                                      color: Colors.white54,
                                       fontSize: 14,
-                                      height: 1.6,
                                     ),
-                                    decoration: InputDecoration(
-                                      hintText: 'rescue.notes_hint'.tr(),
-                                      hintStyle: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 13,
-                                      ),
-                                      filled: true,
-                                      fillColor: const Color(0xFF050505),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(
-                                          color: const Color(0xFFD4AF37).withOpacity(0.3),
-                                          width: 1.5,
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(
-                                          color: const Color(0xFFD4AF37).withOpacity(0.3),
-                                          width: 1.5,
-                                        ),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(
-                                          color: Color(0xFF3B82F6),
-                                          width: 2,
-                                        ),
-                                      ),
-                                      contentPadding: const EdgeInsets.all(16),
+                                    filled: true,
+                                    fillColor: const Color(0xFF1A1A1A),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
                                     ),
+                                    contentPadding: const EdgeInsets.all(16),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 28),
+                            const SizedBox(height: 24),
                             if (isGuest)
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -525,9 +386,8 @@ class _RescueScreenState extends State<RescueScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF050505),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(color: Colors.white10),
+                                      color: const Color(0xFF1A1A1A),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
                                       'auth.login_required_message'.tr(),
@@ -541,12 +401,12 @@ class _RescueScreenState extends State<RescueScreen> {
                                   const SizedBox(height: 12),
                                   SizedBox(
                                     width: double.infinity,
-                                    height: 52,
+                                    height: 50,
                                     child: ElevatedButton(
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color(0xFFD4AF37),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
                                       ),
                                       onPressed: () {
@@ -559,74 +419,46 @@ class _RescueScreenState extends State<RescueScreen> {
                                       child: Text(
                                         'auth.login_button'.tr(),
                                         style: textTheme.titleMedium?.copyWith(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
                                           color: Colors.white,
                                         ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
                                 ],
                               )
                             else
-                              Container(
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  gradient: const LinearGradient(
-                                    colors: [const Color(0xFFD4AF37), const Color(0xFFB8942E)],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFFD4AF37).withOpacity(0.3).withOpacity(0.3),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
                                 child: ElevatedButton(
-                                  onPressed: state.isSubmitting ? null : _submit,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
+                                    backgroundColor: const Color(0xFFD4AF37),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    padding: EdgeInsets.zero,
                                   ),
+                                  onPressed: state.isSubmitting ? null : _submit,
                                   child: state.isSubmitting
                                       ? const SizedBox(
-                                          width: 24,
-                                          height: 24,
+                                          width: 20,
+                                          height: 20,
                                           child: CircularProgressIndicator(
-                                            strokeWidth: 2.5,
+                                            strokeWidth: 2,
                                             color: Colors.white,
                                           ),
                                         )
-                                      : Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            const Icon(
-                                              Icons.send_rounded,
-                                              size: 20,
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Text(
-                                              'rescue.submit'.tr(),
-                                              style: textTheme.titleMedium?.copyWith(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ],
+                                      : Text(
+                                          'rescue.submit'.tr(),
+                                          style: textTheme.titleMedium?.copyWith(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                 ),
                               ),
-                            const SizedBox(height: 12),
                           ],
                         ),
                       ),
@@ -641,9 +473,43 @@ class _RescueScreenState extends State<RescueScreen> {
     );
   }
 
-  Widget _buildModernDropdown({
-    required String label,
+  Widget _buildSection({
+    required String title,
     required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: const Color(0xFFD4AF37)),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSimpleDropdown({
+    required String label,
     required int? value,
     required List<DropdownMenuItem<int>> items,
     required void Function(int?) onChanged,
@@ -651,72 +517,27 @@ class _RescueScreenState extends State<RescueScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 4, bottom: 8),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 16,
-                color: const Color(0xFF64748B),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              const Text(
-                ' *',
-                style: TextStyle(
-                  color: const Color(0xFFD4AF37),
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.white70,
           ),
         ),
+        const SizedBox(height: 8),
         DropdownButtonFormField<int>(
           value: value,
           items: items,
           onChanged: onChanged,
           validator: (v) => (v == null) ? 'rescue.required_field'.tr() : null,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 24),
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFF050505),
+            fillColor: const Color(0xFF0A0A0A),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: const Color(0xFFD4AF37).withOpacity(0.3),
-                width: 1.5,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: const Color(0xFFD4AF37).withOpacity(0.3),
-                width: 1.5,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF3B82F6),
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: const Color(0xFFD4AF37),
-                width: 1.5,
-              ),
+              borderSide: BorderSide.none,
             ),
           ),
           style: const TextStyle(
@@ -729,76 +550,45 @@ class _RescueScreenState extends State<RescueScreen> {
     );
   }
 
-  Widget _buildDateTimeField({
+  Widget _buildSimpleField({
     required String label,
     required String value,
     required VoidCallback onTap,
-    required IconData icon,
   }) {
-    final hasValue = value != 'rescue.select_datetime'.tr();
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 4, bottom: 8),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 16,
-                color: const Color(0xFF64748B),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              const Text(
-                ' *',
-                style: TextStyle(
-                  color: const Color(0xFFD4AF37),
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.white70,
           ),
         ),
+        const SizedBox(height: 8),
         InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFF050505),
+              color: const Color(0xFF0A0A0A),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFFD4AF37).withOpacity(0.3),
-                width: 1.5,
-              ),
             ),
             child: Row(
               children: [
                 Expanded(
                   child: Text(
                     value,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: hasValue ? Colors.white : Colors.white70,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.edit_calendar_rounded,
-                  size: 20,
-                  color: hasValue ? const Color(0xFF8B5CF6) : Colors.white70,
-                ),
+                const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white54),
               ],
             ),
           ),
@@ -807,98 +597,4 @@ class _RescueScreenState extends State<RescueScreen> {
     );
   }
 
-  Widget _buildLocationField({
-    required String label,
-    required String value,
-    required VoidCallback onTap,
-    required bool hasLocation,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 4, bottom: 8),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.location_on_rounded,
-                size: 16,
-                color: Color(0xFF64748B),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              const Text(
-                ' *',
-                style: TextStyle(
-                  color: const Color(0xFFD4AF37),
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: hasLocation 
-                  ? const Color.fromARGB(13, 16, 185, 129)
-                  : const Color(0xFF050505),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: hasLocation 
-                    ? const Color.fromARGB(77, 16, 185, 129)
-                    : const Color(0xFFD4AF37).withOpacity(0.3),
-                width: 1.5,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: hasLocation 
-                        ? const Color.fromARGB(26, 16, 185, 129)
-                        : const Color(0xFF050505),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    hasLocation ? Icons.check_circle_rounded : Icons.map_rounded,
-                    size: 20,
-                    color: hasLocation ? const Color(0xFF10B981) : Colors.white70,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: hasLocation ? const Color(0xFF059669) : Colors.white70,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_back_ios_rounded,
-                  size: 16,
-                  color: hasLocation ? const Color(0xFF10B981) : Colors.white70,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }

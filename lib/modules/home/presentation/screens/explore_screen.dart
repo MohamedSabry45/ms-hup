@@ -34,8 +34,7 @@ class ExploreScreen extends StatelessWidget {
         title: 'home.explore.gentleman_barber',
         image: 'assets/images/the gentlement baraber.png',
         icon: Icons.content_cut,
-        route: RoutesName.mainScreen,
-        arguments: 2,
+        route: RoutesName.barberDetailScreen,
         fullWidth: true,
       ),
       _ExploreCardData(
@@ -43,8 +42,7 @@ class ExploreScreen extends StatelessWidget {
         title: 'Racing Simulator',
         image: 'assets/images/recing similator.png',
         icon: Icons.content_cut,
-        route: RoutesName.mainScreen,
-        arguments: 2,
+        route: RoutesName.simulatorDetailScreen,
         fullWidth: true,
       ),
       

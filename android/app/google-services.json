@@ -45,6 +45,65 @@
             {
               "client_id": "83287093703-rtpm0pte9p8vu5i4j9h83bu7iic8k5qb.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "83287093703-dji25inil307utdmmefub3g23d3rcq11.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "COM.MSHUB.COM"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:83287093703:android:4d8bba02ac6294efa969e2",
+        "android_client_info": {
+          "package_name": "com.mshib.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "83287093703-2kb8cgas8t1itrh0qtm7afgcughu5adc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mshib.com",
+            "certificate_hash": "bc171b5aa4a7a99a7bde2ac532647cdcb487a9bd"
+          }
+        },
+        {
+          "client_id": "83287093703-mehrc4jpfi0qih68celgg39n2cmmfkaf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mshib.com",
+            "certificate_hash": "8eb26350adf7ea5ab085d876f3aca0eca12fdd7c"
+          }
+        },
+        {
+          "client_id": "83287093703-rtpm0pte9p8vu5i4j9h83bu7iic8k5qb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEWZ0Kdh6Iu8kecysXe7eNamporQZ4gb4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "83287093703-rtpm0pte9p8vu5i4j9h83bu7iic8k5qb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "83287093703-dji25inil307utdmmefub3g23d3rcq11.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "COM.MSHUB.COM"
+              }
             }
           ]
         }

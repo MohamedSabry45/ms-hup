@@ -18,6 +18,8 @@ import 'package:reservation_workshop/modules/customer/domain/entities/customer_c
 import 'package:reservation_workshop/modules/customer/presentation/cubits/customer_info_cubit/customer_info_cubit.dart';
 import 'package:reservation_workshop/modules/customer/presentation/cubits/customer_info_cubit/customer_info_state.dart';
 import 'package:reservation_workshop/modules/main/presentation/screens/booking_details_args.dart';
+import 'package:reservation_workshop/modules/main/presentation/tabs/barber_booking_tab.dart';
+import 'package:reservation_workshop/modules/main/presentation/tabs/simulator_booking_tab.dart';
 import 'package:reservation_workshop/modules/main/presentation/widgets/booking_dropdown_field.dart';
 import 'package:reservation_workshop/modules/main/presentation/widgets/date_time_field.dart';
 import 'package:reservation_workshop/modules/main/presentation/widgets/notes_field.dart';
@@ -28,7 +30,9 @@ import 'package:reservation_workshop/modules/service/presentation/cubits/service
 import 'package:reservation_workshop/modules/service/presentation/cubits/service_cubit/service_state.dart';
 
 class BookingTabView extends StatefulWidget {
-  const BookingTabView({super.key});
+  final int? initialTab;
+
+  const BookingTabView({super.key, this.initialTab});
 
   @override
   State<BookingTabView> createState() => _BookingTabViewState();
@@ -45,7 +49,8 @@ class _BookingTabViewState extends State<BookingTabView> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    final initialIndex = widget.initialTab ?? 0;
+    _tabController = TabController(length: 3, vsync: this, initialIndex: initialIndex.clamp(0, 2));
     _loadSelectedCar();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -183,8 +188,8 @@ class _BookingTabViewState extends State<BookingTabView> with SingleTickerProvid
                     controller: _tabController,
                     children: [
                       _buildNormalBookingTab(context, textTheme, customerName, cars, greeting),
-                      _buildServiceBookingTab(context, textTheme, customerName, cars, greeting),
-                      _buildEstimatorBookingTab(context, textTheme, customerName, cars, greeting),
+                      const BarberBookingTab(),
+                      const SimulatorBookingTab(),
                     ],
                   ),
                 ),
@@ -208,7 +213,14 @@ class _BookingTabViewState extends State<BookingTabView> with SingleTickerProvid
                 child: AppCard(
                   padding: const EdgeInsets.all(16),
                   borderRadius: 18,
-                  backgroundColor: const Color(0xFF050505),
+                  backgroundGradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF080808),
+                      Color(0xFF111111),
+                    ],
+                  ),
                   borderColor: const Color(0xFFD4AF37).withOpacity(0.25),
                   boxShadow: [
                     BoxShadow(
@@ -239,6 +251,10 @@ class _BookingTabViewState extends State<BookingTabView> with SingleTickerProvid
                               BookingDropdownField<int>(
                                 label: 'booking.car'.tr(),
                                 labelColor: Colors.white,
+                                fillColor: const Color(0xFF141414),
+                                textColor: Colors.white,
+                                dropdownColor: const Color(0xFF1A1A1A),
+                                iconColor: Colors.white70,
                                 value: _selectedCarId,
                                 items: cars
                                     .map(
@@ -262,13 +278,30 @@ class _BookingTabViewState extends State<BookingTabView> with SingleTickerProvid
                               const SizedBox(height: AppSpacing.lg),
                               BlocBuilder<BranchCubit, BranchState>(
                                 builder: (context, branchState) {
-                                  final branches = branchState is BranchSuccess ? branchState.branches : const <Branch>[];
+                                  final branches = branchState is BranchSuccess
+                                      ? branchState.branches.where((b) => b.isCarStation == 1).toList()
+                                      : const <Branch>[];
+
+                                  if (_selectedBranchId != null && !branches.any((b) => b.id == _selectedBranchId)) {
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      if (!mounted) return;
+                                      setState(() {
+                                        _selectedBranchId = null;
+                                        _selectedServiceId = null;
+                                      });
+                                      context.read<ServiceCubit>().clear();
+                                    });
+                                  }
 
                                   return BookingDropdownField<int>(
                                     label: 'booking.select_branch'.tr(),
                                     labelColor: Colors.white,
                                     isRequired: true,
                                     value: _selectedBranchId,
+                                    fillColor: const Color(0xFF141414),
+                                    textColor: Colors.white,
+                                    dropdownColor: const Color(0xFF1A1A1A),
+                                    iconColor: Colors.white70,
                                     items: branches
                                         .map(
                                           (b) => DropdownMenuItem<int>(
@@ -347,12 +380,18 @@ class _BookingTabViewState extends State<BookingTabView> with SingleTickerProvid
                               DateTimeField(
                                 label: 'booking.select_datetime'.tr(),
                                 labelColor: Colors.white,
+                                fillColor: const Color(0xFF141414),
+                                textColor: Colors.white,
+                                iconColor: Colors.white70,
                                 valueText: _formatDateTime(_selectedDateTime),
                                 onPick: _pickDateTime,
                               ),
                               const SizedBox(height: AppSpacing.lg),
                               NotesField(
                                 hintText: 'booking.describe_problem'.tr(),
+                                fillColor: const Color(0xFF141414),
+                                textColor: Colors.white,
+                                hintColor: Colors.white54,
                                 controller: _notesController,
                               ),
                             ],
@@ -470,486 +509,6 @@ class _BookingTabViewState extends State<BookingTabView> with SingleTickerProvid
               ],
             );
   }
-
-  Widget _buildServiceBookingTab(BuildContext context, TextTheme textTheme, String customerName, List<CustomerCar> cars, String greeting) {
-    const int _serviceBranchId = 3; // barber branch
-
-    // Load services for this specific branch
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<ServiceCubit>().load(locationId: _serviceBranchId);
-    });
-
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          sliver: SliverToBoxAdapter(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: AppCard(
-                  padding: const EdgeInsets.all(16),
-                  borderRadius: 18,
-                  backgroundColor: const Color(0xFF050505),
-                  borderColor: const Color(0xFFD4AF37).withOpacity(0.25),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFD4AF37).withOpacity(0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        greeting,
-                        style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'booking.barber_subtitle'.tr(),
-                        style: textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withOpacity(0.7),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      BlocBuilder<BranchCubit, BranchState>(
-                        builder: (context, branchState) {
-                          final branches = branchState is BranchSuccess ? branchState.branches : const <Branch>[];
-                          final barberBranch = branches.where((b) => b.id == _serviceBranchId).toList();
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'booking.select_branch'.tr(),
-                                style: textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0A0A0A),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: const Color(0xFFD4AF37).withOpacity(0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  barberBranch.isNotEmpty ? barberBranch.first.name : 'Barber',
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      BlocBuilder<ServiceCubit, ServiceState>(
-                        builder: (context, serviceState) {
-                          final services = serviceState is ServiceSuccess ? serviceState.services : const <Service>[];
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    'booking.select_service'.tr(),
-                                    style: textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Text(
-                                    '*',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFFD4AF37),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              GridView.count(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 10,
-                                childAspectRatio: 2.55,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                children: services
-                                    .map(
-                                      (s) => _ServiceCard(
-                                        title: s.name,
-                                        selected: _selectedServiceId == s.id,
-                                        onTap: () => setState(() => _selectedServiceId = s.id),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      DateTimeField(
-                        label: 'booking.select_datetime'.tr(),
-                        labelColor: Colors.white,
-                        valueText: _formatDateTime(_selectedDateTime),
-                        onPick: _pickDateTime,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      NotesField(
-                        hintText: 'booking.describe_problem'.tr(),
-                        controller: _notesController,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const SizedBox(height: AppSpacing.lg),
-                    SubmitBookingButton(
-                      onPressed: () {
-                        final serviceId = _selectedServiceId;
-
-                        if (serviceId == null) {
-                          Toasters.show('booking.toast_select_service'.tr());
-                          return;
-                        }
-
-                        final customerState = context.read<CustomerInfoCubit>().state;
-                        final name = customerState is CustomerInfoSuccess ? customerState.info.name : '';
-                        final phone = customerState is CustomerInfoSuccess ? customerState.info.mobile : '';
-
-                        final branchState = context.read<BranchCubit>().state;
-                        final branches = branchState is BranchSuccess ? branchState.branches : const <Branch>[];
-                        final selectedBranch = branches.where((b) => b.id == _serviceBranchId).toList();
-
-                        final serviceState = context.read<ServiceCubit>().state;
-                        final services = serviceState is ServiceSuccess ? serviceState.services : const <Service>[];
-                        final selectedService = services.where((s) => s.id == serviceId).toList();
-
-                        final note = _notesController.text.trim();
-                        final bookingStart = _formatBookingStart(_selectedDateTime);
-
-                        final model = NotificationCardModel(
-                          workOrderNo: '-',
-                          customer: '',
-                          car: '-',
-                          carModel: '-',
-                          plate: '-',
-                          status: '-',
-                          dateTime: bookingStart,
-                          service: selectedService.isNotEmpty ? selectedService.first.name : '-',
-                          branch: selectedBranch.isNotEmpty ? selectedBranch.first.name : '-',
-                          area: note.isEmpty ? '-' : note,
-                          name: name,
-                          phone: phone,
-                        );
-
-                        final args = BookingDetailsArgs(
-                          model: model,
-                          bookingStart: bookingStart,
-                          locationId: _serviceBranchId,
-                          serviceId: serviceId,
-                          deviceId: 0,
-                          bookingNote: note,
-                        );
-
-                        Navigator.pushNamed(
-                          context,
-                          RoutesName.bookingDetailsScreen,
-                          arguments: args,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'booking.can_edit_before_confirm'.tr(),
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.grey7,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEstimatorBookingTab(BuildContext context, TextTheme textTheme, String customerName, List<CustomerCar> cars, String greeting) {
-    const int _estimatorBranchId = 2; // simulation car race branch
-
-    // Load services for this specific branch
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<ServiceCubit>().load(locationId: _estimatorBranchId);
-    });
-
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          sliver: SliverToBoxAdapter(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: AppCard(
-                  padding: const EdgeInsets.all(16),
-                  borderRadius: 18,
-                  backgroundColor: const Color(0xFF050505),
-                  borderColor: const Color(0xFFD4AF37).withOpacity(0.25),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFD4AF37).withOpacity(0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        greeting,
-                        style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'booking.simulator_subtitle'.tr(),
-                        style: textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withOpacity(0.7),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      BlocBuilder<BranchCubit, BranchState>(
-                        builder: (context, branchState) {
-                          final branches = branchState is BranchSuccess ? branchState.branches : const <Branch>[];
-                          final estimatorBranch = branches.where((b) => b.id == _estimatorBranchId).toList();
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'booking.select_branch'.tr(),
-                                style: textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0A0A0A),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: const Color(0xFFD4AF37).withOpacity(0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  estimatorBranch.isNotEmpty ? estimatorBranch.first.name : 'Simulation Car Race',
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      BlocBuilder<ServiceCubit, ServiceState>(
-                        builder: (context, serviceState) {
-                          final services = serviceState is ServiceSuccess ? serviceState.services : const <Service>[];
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    'booking.select_service'.tr(),
-                                    style: textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Text(
-                                    '*',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFFD4AF37),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              GridView.count(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 10,
-                                childAspectRatio: 2.55,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                children: services
-                                    .map(
-                                      (s) => _ServiceCard(
-                                        title: s.name,
-                                        selected: _selectedServiceId == s.id,
-                                        onTap: () => setState(() => _selectedServiceId = s.id),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      DateTimeField(
-                        label: 'booking.select_datetime'.tr(),
-                        labelColor: Colors.white,
-                        valueText: _formatDateTime(_selectedDateTime),
-                        onPick: _pickDateTime,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      NotesField(
-                        hintText: 'booking.describe_problem'.tr(),
-                        controller: _notesController,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const SizedBox(height: AppSpacing.lg),
-                    SubmitBookingButton(
-                      onPressed: () {
-                        final serviceId = _selectedServiceId;
-
-                        if (serviceId == null) {
-                          Toasters.show('booking.toast_select_service'.tr());
-                          return;
-                        }
-
-                        final customerState = context.read<CustomerInfoCubit>().state;
-                        final name = customerState is CustomerInfoSuccess ? customerState.info.name : '';
-                        final phone = customerState is CustomerInfoSuccess ? customerState.info.mobile : '';
-
-                        final branchState = context.read<BranchCubit>().state;
-                        final branches = branchState is BranchSuccess ? branchState.branches : const <Branch>[];
-                        final selectedBranch = branches.where((b) => b.id == _estimatorBranchId).toList();
-
-                        final serviceState = context.read<ServiceCubit>().state;
-                        final services = serviceState is ServiceSuccess ? serviceState.services : const <Service>[];
-                        final selectedService = services.where((s) => s.id == serviceId).toList();
-
-                        final note = _notesController.text.trim();
-                        final bookingStart = _formatBookingStart(_selectedDateTime);
-
-                        final model = NotificationCardModel(
-                          workOrderNo: '-',
-                          customer: '',
-                          car: '-',
-                          carModel: '-',
-                          plate: '-',
-                          status: '-',
-                          dateTime: bookingStart,
-                          service: selectedService.isNotEmpty ? selectedService.first.name : '-',
-                          branch: selectedBranch.isNotEmpty ? selectedBranch.first.name : '-',
-                          area: note.isEmpty ? '-' : note,
-                          name: name,
-                          phone: phone,
-                        );
-
-                        final args = BookingDetailsArgs(
-                          model: model,
-                          bookingStart: bookingStart,
-                          locationId: _estimatorBranchId,
-                          serviceId: serviceId,
-                          deviceId: 0,
-                          bookingNote: note,
-                        );
-
-                        Navigator.pushNamed(
-                          context,
-                          RoutesName.bookingDetailsScreen,
-                          arguments: args,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'booking.can_edit_before_confirm'.tr(),
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.grey7,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 class _ServiceCard extends StatelessWidget {
@@ -972,21 +531,28 @@ class _ServiceCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFD4AF37) : const Color(0xFF0A0A0A),
-          borderRadius: BorderRadius.circular(12),
+          color: selected ? const Color(0xFFD4AF37) : const Color(0xFF141414),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? const Color(0xFFD4AF37) : const Color(0xFFD4AF37).withOpacity(0.3),
+            color: selected ? const Color(0xFFD4AF37) : const Color(0xFFD4AF37).withOpacity(0.15),
             width: 1.2,
           ),
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: const Color(0xFFD4AF37).withOpacity(0.4),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
+                    color: const Color(0xFFD4AF37).withOpacity(0.35),
+                    blurRadius: 14,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 5),
                   ),
                 ]
-              : [],
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
         ),
         child: Center(
           child: Text(
@@ -997,7 +563,7 @@ class _ServiceCard extends StatelessWidget {
             style: textTheme.bodySmall?.copyWith(
               height: 1.2,
               fontWeight: FontWeight.w700,
-              color: selected ? Colors.white : AppColors.brandDark,
+              color: selected ? Colors.black : Colors.white,
             ),
           ),
         ),

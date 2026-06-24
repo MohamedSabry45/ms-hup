@@ -3,7 +3,7 @@ name: reservation_workshop
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.0+3
 
 environment:
   sdk: ^3.10.4
@@ -30,6 +30,7 @@ dependencies:
   http: ^1.2.2
   url_launcher: ^6.3.0
   geolocator: ^11.0.0
+  geocoding: ^3.0.0
   flutter_map: ^6.1.0
   latlong2: ^0.9.1
   easy_localization: ^3.0.7

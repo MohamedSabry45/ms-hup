@@ -31,15 +31,13 @@ class HomeLifestyleSection extends StatelessWidget {
         icon: Icons.content_cut_outlined,
         title: 'home.premium_barber',
         subtitle: 'home.premium_barber_subtitle',
-        route: RoutesName.mainScreen,
-        arguments: 2,
+        route: RoutesName.barberDetailScreen,
       ),
       _LifestyleItem(
         icon: Icons.sports_esports_outlined,
         title: 'home.vip_playstation',
         subtitle: 'home.vip_playstation_subtitle',
-        route: RoutesName.mainScreen,
-        arguments: 2,
+        route: RoutesName.simulatorDetailScreen,
       ),
     ];
 
@@ -108,14 +106,12 @@ class _LifestyleItem {
   final String title;
   final String subtitle;
   final String route;
-  final dynamic arguments;
 
   _LifestyleItem({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.route,
-    this.arguments,
   });
 }
 
@@ -138,15 +134,7 @@ class _LifestyleCardState extends State<_LifestyleCard>
     Future.delayed(const Duration(milliseconds: 120), () {
       if (!mounted) return;
       setState(() => _pressed = false);
-      if (widget.item.arguments != null) {
-        Navigator.pushNamed(
-          context,
-          widget.item.route,
-          arguments: widget.item.arguments,
-        );
-      } else {
-        Navigator.pushNamed(context, widget.item.route);
-      }
+      Navigator.pushNamed(context, widget.item.route);
     });
   }
 

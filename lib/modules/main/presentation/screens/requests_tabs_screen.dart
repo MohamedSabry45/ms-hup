@@ -37,6 +37,7 @@ class _RequestsTabsScreenState extends State<RequestsTabsScreen> with SingleTick
   bool _customerLoaded = false;
 
   int? _selectedCarId;
+  int? _bookingSubTab;
 
   int _selectedBottomIndex = 2;
 
@@ -62,11 +63,20 @@ class _RequestsTabsScreenState extends State<RequestsTabsScreen> with SingleTick
     }
 
     if (!_controllerInitialized) {
-      final int initialIndex = (ModalRoute.of(context)?.settings.arguments as int?) ?? 2;
+      final args = ModalRoute.of(context)?.settings.arguments;
+      int initialIndex = 2;
+
+      if (args is int) {
+        initialIndex = args.clamp(0, tabCount - 1);
+      } else if (args is Map<String, dynamic>) {
+        initialIndex = (args['mainTab'] as int?)?.clamp(0, tabCount - 1) ?? 2;
+        _bookingSubTab = (args['bookingSubTab'] as int?)?.clamp(0, 2);
+      }
+
       _tabController = TabController(
         length: tabCount,
         vsync: this,
-        initialIndex: initialIndex.clamp(0, tabCount - 1),
+        initialIndex: initialIndex,
       );
       _tabController.addListener(() {
         if (!mounted) return;
@@ -313,11 +323,11 @@ class _RequestsTabsScreenState extends State<RequestsTabsScreen> with SingleTick
                   Expanded(
                     child: TabBarView(
                       controller: _tabController,
-                      children: const [
-                        EstimatorsTabView(),
-                        MaintenanceTabView(),
-                        BookingTabView(),
-                        InvoicesTabView(),
+                      children: [
+                        const EstimatorsTabView(),
+                        const MaintenanceTabView(),
+                        BookingTabView(initialTab: _bookingSubTab),
+                        const InvoicesTabView(),
                       ],
                     ),
                   ),

@@ -22,7 +22,8 @@ class AddBookingCubit extends Cubit<AddBookingState> {
     required int locationId,
     required String bookingNote,
     required int serviceId,
-    required int deviceId,
+    int? deviceId,
+    String? bookingType,
   }) async {
     if (await _isGuestMode()) {
       emit(AddBookingGuestNotAllowed());
@@ -36,6 +37,7 @@ class AddBookingCubit extends Cubit<AddBookingState> {
         bookingNote: bookingNote,
         serviceId: serviceId,
         deviceId: deviceId,
+        bookingType: bookingType,
       );
       emit(AddBookingSuccess(msg));
     } catch (e) {

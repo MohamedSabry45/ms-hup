@@ -17,7 +17,8 @@ class AddBookingRemoteDataSource {
     required int locationId,
     required String bookingNote,
     required int serviceId,
-    required int deviceId,
+    int? deviceId,
+    String? bookingType,
   }) async {
     final baseUrl = AppConstants.kBaseUrl.trim();
     final token = AppConstants.token ?? CacheHelper.getData<String>(key: PrefKeys.kAccessToken);
@@ -26,14 +27,23 @@ class AddBookingRemoteDataSource {
       throw Exception('Unauthorized');
     }
 
+    final queryParams = <String, String>{
+      'booking_start': bookingStart,
+      'location_id': locationId.toString(),
+      'booking_note': bookingNote,
+      'service_id': serviceId.toString(),
+    };
+
+    if (deviceId != null) {
+      queryParams['device_id'] = deviceId.toString();
+    }
+
+    if (bookingType != null) {
+      queryParams['type'] = bookingType;
+    }
+
     final uri = Uri.parse('$baseUrl${ApiEndpoints.addBooking}').replace(
-      queryParameters: <String, String>{
-        'booking_start': bookingStart,
-        'location_id': locationId.toString(),
-        'booking_note': bookingNote,
-        'service_id': serviceId.toString(),
-        'device_id': deviceId.toString(),
-      },
+      queryParameters: queryParams,
     );
 
     final res = await _client.post(
