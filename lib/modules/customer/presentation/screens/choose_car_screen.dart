@@ -32,7 +32,29 @@ class _ChooseCarScreenState extends State<ChooseCarScreen> {
     final res = await Navigator.pushNamed(context, RoutesName.addCarScreen);
     if (!mounted) return;
     if (res == true) {
-      context.read<CustomerInfoCubit>().load();
+      // Wait for backend to process
+      await Future.delayed(const Duration(milliseconds: 1000));
+      if (!mounted) return;
+      
+      // Try to reload with retries until we see the new car
+      int retries = 5;
+      for (int i = 0; i < retries; i++) {
+        await context.read<CustomerInfoCubit>().load();
+        if (!mounted) return;
+        
+        // Check if we have cars now
+        final state = context.read<CustomerInfoCubit>().state;
+        if (state is CustomerInfoSuccess && state.info.cars.isNotEmpty) {
+          // Success - cars loaded
+          return;
+        }
+        
+        // Wait a bit between retries
+        if (i < retries - 1) {
+          await Future.delayed(const Duration(milliseconds: 1500));
+          if (!mounted) return;
+        }
+      }
     }
   }
 
@@ -113,25 +135,57 @@ class _ChooseCarScreenState extends State<ChooseCarScreen> {
                         ),
                       ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      height: 52,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD4AF37),
-                          foregroundColor: Colors.black,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 52,
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFFD4AF37),
+                                side: const BorderSide(color: Color(0xFFD4AF37), width: 1.2),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  RoutesName.homeScreen,
+                                  (route) => false,
+                                );
+                              },
+                              child: Text(
+                                t(context, 'cars.skip', ar: 'تخطي', en: 'Skip'),
+                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                              ),
+                            ),
                           ),
-                          shadowColor: const Color(0xFFD4AF37).withOpacity(0.4),
                         ),
-                        onPressed: _openAddCar,
-                        child: Text(
-                          t(context, 'cars.add_car', ar: 'إضافة سيارة', en: 'Add car'),
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SizedBox(
+                            height: 52,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFD4AF37),
+                                foregroundColor: Colors.black,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                shadowColor: const Color(0xFFD4AF37).withOpacity(0.4),
+                              ),
+                              onPressed: _openAddCar,
+                              child: Text(
+                                t(context, 'cars.add_car', ar: 'إضافة سيارة', en: 'Add car'),
+                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),

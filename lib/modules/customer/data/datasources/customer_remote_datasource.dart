@@ -22,12 +22,15 @@ class CustomerRemoteDataSource {
       throw Exception('Unauthorized');
     }
 
-    final uri = Uri.parse('$baseUrl${ApiEndpoints.customerInfo}');
+    // Add timestamp to prevent caching
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final uri = Uri.parse('$baseUrl${ApiEndpoints.customerInfo}?_t=$timestamp');
     final res = await _client.get(
       uri,
       headers: <String, String>{
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
       },
     );
 

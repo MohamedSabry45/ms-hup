@@ -59,6 +59,13 @@ class CustomerInfoCubit extends Cubit<CustomerInfoState> {
     }
   }
 
+  Future<void> forceReload() async {
+    if (isClosed) return;
+    _safeEmit(CustomerInfoInitial());
+    await Future.delayed(const Duration(milliseconds: 100));
+    await load();
+  }
+
   Future<void> updateBasicInfo({
     required int id,
     required String firstName,
